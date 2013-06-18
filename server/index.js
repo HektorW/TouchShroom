@@ -2,6 +2,37 @@ var io = require('socket.io').listen(8888);
 io.set('log level', 2);
 
 
+/** [ CONTROLLER ]
+ * 
+ */
+var CONTROLLER = {
+    clients: [],
+    games: []
+};
+CONTROLLER.connection = function(socket){
+    // SETUP CLIENT
+    CONTROLLER.clients.push(socket);
+
+    /////////////////
+    // BIND EVENTS //
+    /////////////////
+    socket.on('disconnect', function(){
+        CONTROLLER.remove(socket);
+    });
+
+
+    socket.emit('C.num_players', {num_players: CONTROLLER.clients.length});
+};
+CONTROLLER.remove = function(socket){
+    var index = -1;
+    CONTROLLER.clients.forEach(function(e, i){
+        if(e.id === socket.id)
+            index = i;
+    });
+    if(index != -1)
+        CONTROLLER.clients.splice(index, 1);
+};
+
 
 /** [ GAME ]
  * 
@@ -41,6 +72,7 @@ GAME.connection = function(socket){
     });
     socket.on('target', function(data){
     });
+
     // MINION
     socket.on('p.minion', function(data){
         GAME.broadcast('b.minion', data);
@@ -181,11 +213,48 @@ var randomColor = (function(){
 })();
 var uniqueID = (function(){
     var id = 0;
-    return function(){
+    var types = {};
+    return function(type){
+        if(type){
+            if(!types[type])
+                types[type] = 0;
+            return types[type]++;
+        }
+
         return id++;
     };
 })();
 
+
+/** SETUP PROTOTYPES
+ * 
+ */
+// ARRAY
+if(!Array.prototype.forEach){
+    (function(GLOBAL){
+        Array.prototype.forEach = function(callback, thisarg){
+            thisarg = thisarg || GLOBAL;
+            for(var i = 0, len = this.length; i < len; i++){
+                callback.call(thisarg, this[i], i, this);
+            }
+        };
+    })(this);
+}
+// STRING
+if(!String.prototype.format){
+    String.prototype.format = function(){
+        var args = arguments;
+        return this.replace(/{(\d+)}/g, function(match, number){
+            return (args[number] !== undefined)? args[number] : match;
+        });
+    };
+}
+if(!String.prototype.contains){
+    String.prototype.contains = function(needle, start){
+        start = start || 0;
+        return (this.indexOf(needle) >= start);
+    };
+}
 
 
 
@@ -193,4 +262,4 @@ var uniqueID = (function(){
 //////////////
 // START IO //
 //////////////
-io.sockets.on('connection', GAME.connection);
+io.sockets.on('connection', CONTROLLER.connection);

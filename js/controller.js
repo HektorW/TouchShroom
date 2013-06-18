@@ -1,21 +1,155 @@
- var CONTROLLER = {
+var CONTROLLER = {
+    current_screen: null
 };
-
+/**
+ * { INIT }
+ */
 CONTROLLER.init = function(){
+    NET.init();
+
+    CONTROLLER.current_screen = 'loading';
+
+
     // Setup listeners
-    var btn_play = DOM('#btn_play');
-    DOM.on(btn_play, 'click', function(){
-        DOM.addClass('#screen_start', 'hidden');
-        DOM.removeClass('#screen_waiting', 'hidden');
+    DOM.on('#btn_play', 'click', function(){
+        CONTROLLER.setScreen('waiting');
     });
 };
+CONTROLLER.setScreen = function(screen){
+    var s = DOM('#screen_' + screen);
+    if(s){
+        if(CONTROLLER.current_screen)
+            DOM.addClass('#screen_' + CONTROLLER.current_screen, 'hidden');
+        CONTROLLER.current_screen = screen;
+        DOM.removeClass(s, 'hidden');
+    }
+};
+
+/**
+ * { CONNECTED }
+ */
+CONTROLLER.connected = function(){
+    timed('Connected!');
+    CONTROLLER.setScreen('start');
+};
+/** 
+ * { NO CONNECT}
+ * Could not connect to server
+ */
+CONTROLLER.noconnect = function(){
+    timed('Could not connect to server!');
+    CONTROLLER.setScreen('noconnect');
+};
+/**
+ * { DISCONNECTED }
+ */
+CONTROLLER.disconnected = function(){
+    timed('Disconnected from server!');
+    CONTROLLER.setScreen('noconnect');
+};
 
 
 
 
+/** [ NET ]
+ * @type {Object}
+ */
+var NET = {
+    socket: null,
+    connected: false
+};
+/** { INIT }
+ *
+ */
+NET.init = function(){
+    this.socket = io.connect(':8888', {
+        reconnect: true
+    });
+
+    this.socket.on('error', function(){
+        if(!NET.connected){
+            CONTROLLER.noconnect();
+        }
+    });
+    this.socket.on('connect', function(){
+        NET.connected = true;
+        CONTROLLER.connected();
+    });
+    this.socket.on('disconnect', function(){
+        NET.connected = false;
+        CONTROLLER.disconnected();
+    });
+
+
+    ////////////////
+    // CONTROLLER //
+    ////////////////
+    this.socket.on('C.num_players', function(data){
+        timed('Players online: ' + data.num_players);
+    });
 
 
 
+    //////////
+    // GAME //
+    //////////
+    this.socket.on('my player', function(data){
+        GAME.me = new Base(data.player.aspect_left, data.player.aspect_top, data.player.aspect_size, data.player.color);
+        GAME.me.player_id = data.player.player_id;
+        GAME.bases.push(GAME.me);
+    });
+
+    this.socket.on('g.players', function(data){
+        var i, b, len;
+        var p = data.players;
+        for(i = 0, len = p.length; i < len; i++){
+            var index = GAME.bases.indexByID(p[i].player_id);
+
+            // If player is not in game -> Add
+            if(index === undefined){
+                b = new Base(p[i].aspect_left, p[i].aspect_top, p[i].aspect_size, p[i].color);
+                b.player_id = p[i].player_id;
+                GAME.bases.push(b);
+            }
+            // Else set values correct
+            else {
+                b = GAME.bases[index];
+                b.aspect_left = p[i].aspect_left;
+                b.aspect_top = p[i].aspect_top;
+                b.aspect_size = p[i].aspect_size;
+                b.color = p[i].color;
+            }
+        }
+
+        // Call resize to fix aspects
+        GAME.resize();
+    });
+
+    this.socket.on('p.connection', function(data){
+        if(data.player.player_id !== GAME.me.player_id){
+            var b = new Base(data.player.aspect_left, data.player.aspect_top, data.player.aspect_size, data.player.color);
+            b.player_id = data.player.player_id;
+            GAME.bases.push(b);
+        }
+    });
+    this.socket.on('p.disconnection', function(data){
+        var i = GAME.bases.indexByID(data.player_id);
+        if(i !== undefined){
+            GAME.bases.splice(i, 1);
+        }
+    });
+
+    this.socket.on('b.minion', function(data){
+        var source_index = GAME.bases.indexByID(data.source_id);
+        var target_index = GAME.bases.indexByID(data.target_id);
+
+        if(source_index !== undefined && target_index !== undefined){
+            GAME.minions.push(
+                new Minion(GAME.bases[source_index], GAME.bases[target_index])
+                );
+        }
+    });
+};
 
 
 
@@ -53,6 +187,48 @@ if(!String.prototype.contains){
 }
 
 
+
+/** DEBUG UTIL
+ * 
+ */
+var out = (function(){
+    var msgs = {};
+    var elem;
+
+    window.addEventListener('load', function(){
+        elem = document.querySelector('#output');
+    }, false);
+
+    function newElem(content, name){
+        var e = document.createElement('div');
+        elem.appendChild(e);
+        e.innerHTML = (name)? name + ': ' + content: content;
+        return e;
+    }
+
+    var f = function(){
+        var args = arguments;
+        var name;
+
+        switch(args.length){
+            case 1: {
+                newElem(args[0]);
+            } break;
+            case 2: {
+                name = args[0];
+                if(msgs[name]){
+                    msgs[name].innerHTML = name + ': ' + args[1];
+                } else {
+                    msgs[name] = newElem(args[1], name);
+                }
+            } break;
+        }
+    };
+
+    return f;
+})();
+
+
 /** UTIL
  * 
  */
@@ -65,20 +241,66 @@ var DOM = (function(){
 
     f.addClass = function(elem, cls){
         if(typeof(elem) === 'string')
-            elem = document.querySelectorAll(elem)[0];
+            elem = document.querySelector(elem);
         if(elem)
             elem.classList.add(cls);
     };
     f.removeClass = function(elem, cls){
         if(typeof(elem) === 'string')
-            elem = document.querySelectorAll(elem)[0];
+            elem = document.querySelector(elem);
         if(elem)
             elem.classList.remove(cls);
     };
 
     f.on = function(elem, event, callback, capture){
-        elem.addEventListener(event, callback, capture || false);
+        if(typeof(elem) === 'string')
+            elem = document.querySelector(elem);
+        if(elem)
+            elem.addEventListener(event, callback, capture || false);
     };
+    return f;
+})();
+
+var timed = (function(){
+    var Q = [];
+    var container = null;
+    var elem = null;
+    var timer = null;
+    var delay = 3000;
+
+    window.addEventListener('load', function(){
+        container = document.createElement('div');
+        var div = document.createElement('div');
+        elem = document.createElement('h2');
+
+        container.classList.add('centered_msg');
+        container.classList.add('hidden');
+        div.appendChild(elem);
+        container.appendChild(div);
+
+        document.body.appendChild(container);
+    }, false);
+
+    var timeout = function(){
+        if(Q.length > 0){
+            elem.innerHTML = Q.shift();
+            timer = setTimeout(timeout, delay);
+        } else {
+            timer = null;
+            container.classList.add('hidden');
+        }
+    };
+
+    var f = function(msg){
+        if(timer === null){
+            elem.innerHTML = msg;
+            container.classList.remove('hidden');
+            timer = setTimeout(timeout, delay);
+        } else {
+            Q.push(msg);
+        }
+    };
+
     return f;
 })();
 
