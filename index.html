@@ -9,6 +9,7 @@
 
     <!-- JAVASCRIPT -->
     <script defer type="text/javascript" src="js/socket.io.js"></script>
+    <script defer type="text/javascript" src="js/controller.js"></script>
     <script defer type="text/javascript" src="js/game.js"></script>
 
     <script>
@@ -18,6 +19,7 @@
     </script>
 </head>
 <body>
+    <!-- MESSAGES -->
     <div id="no_connect_msg" class='centered_msg hidden'>
         <div>
             <h2>Could not connect to server :(</h2>
@@ -28,12 +30,31 @@
             <h2>Connected :)</h2>
         </div>
     </div>
-    <div id="loading_msg" class="centered_msg">
+    <div id="loading_msg" class="centered_msg hidden">
         <div>
             <h2>Loading...</h2>
         </div>
     </div>
+    <!-- MESSAGES - END -->
     <div id="output"></div>
+
+    <!-- SCREENS -->
+    <div class="screen_wrapper">
+        <div class="screen_cell">
+
+            <!-- START -->
+            <div id="screen_start" class="screen">
+                <button id="btn_play">PLAY</button>
+            </div>
+
+            <!-- WAITING -->
+            <div id="screen_waiting" class="screen hidden">
+                <h2>Waiting for opponent!</h2>
+                <img src="res/waiting.gif" alt="">
+            </div>
+        </div>
+    </div>
+
     <canvas id="canvas" width="600" height="400">
         <p>Your browser doesn't seem to support the Canvas :(.</p>
     </canvas>

@@ -456,6 +456,9 @@ GAME.startTouch = function(){
     //     }
     // }
 
+    if(!GAME.me)
+        return;
+
     // Test just against [me]
     if(pointInCircle(TOUCH.x, TOUCH.y, GAME.me.x, GAME.me.y, GAME.me.size)){
         GAME.me.selected = true;
@@ -909,29 +912,6 @@ window.AudioContext =
         window.msNow ||
         undefined;
 
-/** SETUP PROTOTYPES
- * 
- */
-if(!Array.prototype.forEach){
-    (function(GLOBAL){
-        Array.prototype.forEach = function(callback, thisarg){
-            thisarg = thisarg || GLOBAL;
-            for(var i = 0, len = this.length; i < len; i++){
-                callback.call(thisarg, this[i], i, this);
-            }
-        };
-    })(this);
-}
-
-if(!String.prototype.format){
-    String.prototype.format = function(){
-        var args = arguments;
-        return this.replace(/{(\d+)}/g, function(match, number){
-            return (args[number] !== undefined)? args[number] : match;
-        });
-    };
-}
-
 
 /**
  * GRADIENT CODE
@@ -970,4 +950,4 @@ if(!String.prototype.format){
 /** Initialize GAME
  * 
  */
-window.addEventListener('load', GAME.init, false);
+// window.addEventListener('load', GAME.init, false);
