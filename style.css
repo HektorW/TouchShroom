@@ -1,0 +1,31 @@
+body{
+    margin:0;
+    overflow: hidden;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    background-color: #333333;
+}
+
+#output {
+    position:absolute;
+    left:0;
+    top:0;
+}
+
+.centered_msg {
+    z-index: 10;
+    font-family: monospace;
+    /*display: none;*/
+    position: absolute;
+    top: 0;
+    left: 50%;
+    cursor: default;
+}
+.centered_msg div {
+    position: relative;
+    left: -50%;
+}
+
+.hidden { display: none; }

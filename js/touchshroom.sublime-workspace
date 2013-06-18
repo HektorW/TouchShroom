@@ -1,0 +1,2136 @@
+{
+	"auto_complete":
+	{
+		"selected_items":
+		[
+			[
+				"line",
+				"line_size"
+			],
+			[
+				"targ",
+				"target_base"
+			],
+			[
+				"vecD",
+				"vecDistance"
+			],
+			[
+				"vecDis",
+				"vecDistanceSq"
+			],
+			[
+				"asp",
+				"aspect_size  (variable)"
+			],
+			[
+				"update",
+				"update_time"
+			],
+			[
+				"draw",
+				"draw_time  (variable)"
+			],
+			[
+				"spawn",
+				"spawn_delay_max"
+			],
+			[
+				"spa",
+				"spawn_delay"
+			],
+			[
+				"ac",
+				"active  (variable)"
+			],
+			[
+				"point",
+				"pointInCircle"
+			],
+			[
+				"vel",
+				"vel_x"
+			],
+			[
+				"act",
+				"active_time  (variable)"
+			],
+			[
+				"delt",
+				"delta_x"
+			],
+			[
+				"aspe",
+				"aspect_y  (variable)"
+			],
+			[
+				"MI",
+				"Minion"
+			],
+			[
+				"sour",
+				"source_base"
+			],
+			[
+				"tar",
+				"target_base"
+			],
+			[
+				"source",
+				"source_base"
+			],
+			[
+				"ta",
+				"targeted_base"
+			],
+			[
+				"s",
+				"style"
+			],
+			[
+				"MATH",
+				"Math"
+			],
+			[
+				"hover",
+				"hovered_base"
+			],
+			[
+				"hov",
+				"hovered_base"
+			],
+			[
+				"selec",
+				"selected_base"
+			],
+			[
+				"sel",
+				"selected"
+			],
+			[
+				"fun",
+				"function"
+			],
+			[
+				"shad",
+				"shadow_size"
+			],
+			[
+				"shadow",
+				"shadowBlur"
+			],
+			[
+				"start",
+				"start_y"
+			],
+			[
+				"delta",
+				"delta_x"
+			],
+			[
+				"touch",
+				"startTouch"
+			],
+			[
+				"old_",
+				"old_x"
+			],
+			[
+				"late",
+				"latency"
+			],
+			[
+				"mul",
+				"NetworkedMultiplayer"
+			],
+			[
+				"cry",
+				"crypto"
+			],
+			[
+				"in",
+				"intval"
+			],
+			[
+				"for",
+				"for	for …"
+			],
+			[
+				"doc",
+				"doc_c	Class"
+			],
+			[
+				"stat",
+				"statesynch"
+			],
+			[
+				"bord",
+				"border-right"
+			],
+			[
+				"border",
+				"border-bottom"
+			],
+			[
+				"fps",
+				"fps_goal"
+			],
+			[
+				"fps_",
+				"fps_avg"
+			],
+			[
+				"fp",
+				"fps_count"
+			],
+			[
+				"pr",
+				"program_parallax"
+			],
+			[
+				"progr",
+				"program_active"
+			],
+			[
+				"key",
+				"keyCode"
+			],
+			[
+				"canvas",
+				"canvas_sphere"
+			],
+			[
+				"Shader",
+				"ShaderScene"
+			],
+			[
+				"para",
+				"parallax_scale"
+			],
+			[
+				"unif",
+				"uniforms"
+			],
+			[
+				"program",
+				"program_active"
+			],
+			[
+				"uni",
+				"uniform1i"
+			],
+			[
+				"pgr",
+				"program_light"
+			],
+			[
+				"prog",
+				"program_parallax"
+			],
+			[
+				"chart_",
+				"chart_shader"
+			],
+			[
+				"col",
+				"column"
+			],
+			[
+				"chart",
+				"chart_all"
+			],
+			[
+				"back",
+				"background-color"
+			],
+			[
+				"padding",
+				"padding-left"
+			],
+			[
+				"marg",
+				"margin-left"
+			],
+			[
+				"margin",
+				"margin-left"
+			],
+			[
+				"ca",
+				"camera_types"
+			],
+			[
+				"load",
+				"loader"
+			],
+			[
+				"on",
+				"onChange"
+			],
+			[
+				"aut",
+				"auto_speed"
+			],
+			[
+				"light",
+				"lightFolder"
+			],
+			[
+				"curre",
+				"current_effect"
+			],
+			[
+				"simp",
+				"skybox_simpsons"
+			],
+			[
+				"te",
+				"tech_str"
+			],
+			[
+				"test",
+				"test_filter"
+			],
+			[
+				"tech",
+				"techniques"
+			],
+			[
+				"fps_hist",
+				"fps_history_average"
+			],
+			[
+				"fps_c",
+				"fps_count"
+			],
+			[
+				"tes_",
+				"test_time  (variable)"
+			],
+			[
+				"fps_real_",
+				"fps_real_count"
+			],
+			[
+				"fps_rea",
+				"fps_real_count"
+			],
+			[
+				"fps_re",
+				"fps_real_total"
+			],
+			[
+				"fps_his",
+				"fps_history"
+			],
+			[
+				"sho",
+				"shoot_delay_max  (variable)"
+			],
+			[
+				"Conv",
+				"ConvexPolyhedron( points , faces , normals )	cannon.js"
+			],
+			[
+				"third_p",
+				"third_person_camera_values"
+			],
+			[
+				"bindUN",
+				"bindUniform(uniformPointer, array, type)	webgl.js"
+			],
+			[
+				"v_t",
+				"v_texcoord"
+			],
+			[
+				"loadTex",
+				"loadTexture  (function)"
+			],
+			[
+				"df",
+				"diffuse"
+			],
+			[
+				"heih",
+				"height_sample"
+			],
+			[
+				"v_",
+				"v_texcoord"
+			],
+			[
+				"acceptance",
+				"acceptance_lvl"
+			],
+			[
+				"fps_cout",
+				"fps_count_values  (namespace)"
+			],
+			[
+				"fps_coun",
+				"fps_count_values  (namespace)"
+			],
+			[
+				"fps_cou",
+				"fps_count_values  (namespace)"
+			],
+			[
+				"fpc",
+				"fps_count_elapsed_time  (variable)"
+			],
+			[
+				"acceptan",
+				"acceptance_lvl"
+			],
+			[
+				"webgl",
+				"webgl"
+			],
+			[
+				"experimenal",
+				"experimental-webgl"
+			],
+			[
+				"Tech",
+				"Technique()	technique.js"
+			],
+			[
+				"acceptanc",
+				"acceptance_time"
+			],
+			[
+				"technique",
+				"technique_groups"
+			],
+			[
+				"active",
+				"active_technique"
+			],
+			[
+				"Techn",
+				"TechniqueGroup(name, techniques)	technique.js"
+			],
+			[
+				"fps_count_",
+				"fps_count_last  (variable)"
+			],
+			[
+				"set",
+				"setZero()	cannon.js"
+			],
+			[
+				"norma",
+				"normalize"
+			],
+			[
+				"scale",
+				"scaleBias"
+			],
+			[
+				"rocks_",
+				"rocks_height"
+			],
+			[
+				"sample",
+				"sample_normal"
+			],
+			[
+				"text",
+				"texture2D"
+			],
+			[
+				"sam",
+				"sampler2D"
+			],
+			[
+				"padding-",
+				"padding-top"
+			],
+			[
+				"backgru",
+				"background-color"
+			],
+			[
+				"head",
+				"head	Tag"
+			],
+			[
+				"enable",
+				"enableProgram  (function)"
+			],
+			[
+				"bindUn",
+				"bindUniform  (function)"
+			],
+			[
+				"bindAttr",
+				"bindAttribBuffer  (function)"
+			],
+			[
+				"las",
+				"last_program_used  (variable)"
+			],
+			[
+				"u_",
+				"u_normalmap"
+			],
+			[
+				"sphere",
+				"sphere_material  (variable)"
+			],
+			[
+				"di",
+				"dist_offset  (variable)"
+			],
+			[
+				"camera",
+				"camera_types  (namespace)"
+			],
+			[
+				"look",
+				"look_at  (variable)"
+			],
+			[
+				"random",
+				"randomRange  (function)"
+			],
+			[
+				"setFrom",
+				"setFromAxisAngle(axis,angle)	cannon.js"
+			],
+			[
+				"worldM",
+				"worldMatrix  (function)"
+			],
+			[
+				"world",
+				"worldMatrix(translation, scale, rotation, world)	util.js"
+			],
+			[
+				"drawIn",
+				"drawIndexed(num_items)	webgl.js"
+			],
+			[
+				"tex",
+				"textures[name]  (namespace)"
+			]
+		]
+	},
+	"buffers":
+	[
+		{
+			"file": "/C/Users/Hektor/Dropbox/Webb/TouchShroom/index.html",
+			"settings":
+			{
+				"buffer_size": 678,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "game.js",
+			"settings":
+			{
+				"buffer_size": 12909,
+				"line_ending": "Windows"
+			}
+		}
+	],
+	"build_system": "",
+	"command_palette":
+	{
+		"height": 135.0,
+		"selected_items":
+		[
+			[
+				"tog men",
+				"View: Toggle Menu"
+			],
+			[
+				"move",
+				"File: Move"
+			],
+			[
+				"snippet can",
+				"Snippet: Canvas"
+			],
+			[
+				"snipp",
+				"Snippet: Canvas"
+			],
+			[
+				"rena",
+				"File: Rename"
+			],
+			[
+				"late togg",
+				"LaTeXTools: Toggle focus (PDF/editor)"
+			],
+			[
+				"dupli",
+				"File: Duplicate"
+			],
+			[
+				"snippet ar",
+				"Snippet: Class Variable"
+			],
+			[
+				"setting",
+				"Preferences: Settings - Default"
+			],
+			[
+				"latex tog",
+				"LaTeXTools: Toggle focus (PDF/editor)"
+			],
+			[
+				"packa en",
+				"Package Control: Enable Package"
+			],
+			[
+				"togg me",
+				"View: Toggle Menu"
+			],
+			[
+				"renam",
+				"File: Rename"
+			],
+			[
+				"ex",
+				"Emmet: Expand Abbreviation"
+			],
+			[
+				"expa",
+				"Emmet: Expand Abbreviation"
+			],
+			[
+				"abbrev",
+				"Emmet: Expand Abbreviation"
+			],
+			[
+				"snippe im",
+				"Snippet: Itemize"
+			],
+			[
+				"ren",
+				"File: Rename"
+			],
+			[
+				"project",
+				"Project: Save As"
+			],
+			[
+				"togg men",
+				"View: Toggle Menu"
+			],
+			[
+				"settings",
+				"Preferences: Settings - User"
+			],
+			[
+				"proje",
+				"Project: Save As"
+			],
+			[
+				"install",
+				"Package Control: Install Package"
+			],
+			[
+				"packa",
+				"Package Control: Install Package"
+			],
+			[
+				"synta p",
+				"Set Syntax: PHP"
+			],
+			[
+				"synt lat",
+				"Set Syntax: LaTeX"
+			],
+			[
+				"dele",
+				"File: Delete"
+			],
+			[
+				"dupl",
+				"File: Duplicate"
+			],
+			[
+				"prefi",
+				"Preferences: Prefixr Key Bindings – Default"
+			],
+			[
+				"remove",
+				"Package Control: Remove Package"
+			],
+			[
+				"insta",
+				"Package Control: Install Package"
+			],
+			[
+				"key ",
+				"Preferences: Key Bindings - Default"
+			],
+			[
+				"forma",
+				"Format: Javascript"
+			],
+			[
+				"du",
+				"File: Duplicate"
+			],
+			[
+				"synta mark",
+				"Set Syntax: Markdown"
+			],
+			[
+				"emmet",
+				"Emmet: Split\\Join Tag"
+			],
+			[
+				"emme",
+				"Emmet: Match Pair (inward)"
+			],
+			[
+				"syntax mar",
+				"Set Syntax: Markdown"
+			],
+			[
+				"lint",
+				"SublimeLinter: Show Error List"
+			],
+			[
+				"enab",
+				"Package Control: Enable Package"
+			],
+			[
+				"disa",
+				"Package Control: Disable Package"
+			],
+			[
+				"disab",
+				"Package Control: Disable Package"
+			],
+			[
+				"ena",
+				"Package Control: Enable Package"
+			],
+			[
+				"list",
+				"Package Control: List Packages"
+			],
+			[
+				"status",
+				"View: Toggle Status Bar"
+			],
+			[
+				"ins",
+				"Package Control: Install Package"
+			],
+			[
+				"dup",
+				"File: Duplicate"
+			],
+			[
+				"key bin",
+				"Preferences: Key Bindings - User"
+			],
+			[
+				"key bind",
+				"Preferences: Key Bindings - User"
+			],
+			[
+				"jsli",
+				"JSLint"
+			],
+			[
+				"instal ",
+				"Package Control: Install Package"
+			],
+			[
+				"defau",
+				"Preferences: Key Bindings - Default"
+			],
+			[
+				"bind",
+				"Preferences: Key Bindings - User"
+			],
+			[
+				"Snippet: ",
+				"Snippet: if"
+			],
+			[
+				"edit",
+				"Project: Edit"
+			],
+			[
+				"projec",
+				"Project: Add Folder"
+			],
+			[
+				"save",
+				"Project: Save As"
+			],
+			[
+				"add",
+				"Project: Add Folder"
+			],
+			[
+				"ke",
+				"Preferences: Key Bindings - Default"
+			],
+			[
+				"file move",
+				"File: Move"
+			],
+			[
+				"syntax plan",
+				"Set Syntax: Plain Text"
+			],
+			[
+				"pac list",
+				"Package Control: List Packages"
+			],
+			[
+				"Set s mark",
+				"Set Syntax: Markdown"
+			],
+			[
+				"plain ",
+				"Set Syntax: Plain Text"
+			],
+			[
+				"file mo",
+				"File: Move"
+			],
+			[
+				"open",
+				"Sublime Files: Open Navigator"
+			],
+			[
+				"files",
+				"Sublime Files: Open Navigator"
+			],
+			[
+				"INSTALL",
+				"Package Control: Install Package"
+			],
+			[
+				"file ren",
+				"File: Rename"
+			],
+			[
+				"file",
+				"Nodejs::User File Settings"
+			],
+			[
+				"settin",
+				"Preferences: Settings - User"
+			],
+			[
+				"Snippet",
+				"Snippet: for (…) {…} (Improved Native For-Loop)"
+			],
+			[
+				"Snippet: for",
+				"Snippet: for (…) {…}"
+			],
+			[
+				"instal",
+				"Package Control: Install Package"
+			],
+			[
+				"settins",
+				"Preferences: Settings - User"
+			],
+			[
+				"pack",
+				"Package Control: Install Package"
+			],
+			[
+				"paca",
+				"Package Control: Remove Package"
+			],
+			[
+				"Packa",
+				"Package Control: Install Package"
+			],
+			[
+				"pac",
+				"Package Control: Install Package"
+			],
+			[
+				"paga",
+				"Package Control: Install Package"
+			],
+			[
+				"package contr",
+				"Package Control: Install Package"
+			],
+			[
+				"Pac",
+				"Package Control: Install Package"
+			],
+			[
+				"Package Contr",
+				"Package Control: Install Package"
+			],
+			[
+				"Pack",
+				"Package Control: Install Package"
+			]
+		],
+		"width": 450.0
+	},
+	"console":
+	{
+		"height": 125.0
+	},
+	"distraction_free":
+	{
+		"menu_visible": false,
+		"show_minimap": false,
+		"show_open_files": false,
+		"show_tabs": false,
+		"side_bar_visible": false,
+		"status_bar_visible": false
+	},
+	"file_history":
+	[
+		"/C/Users/Hektor/Dropbox/Webb/TouchShroom/touchshroom.sublime-project",
+		"/C/Users/Hektor/Dropbox/Webb/TouchShroom/game.js",
+		"/C/Users/Hektor/Dropbox/Webb/index.php",
+		"/C/Users/Hektor/Dropbox/Webb/Sequencer/index.html",
+		"/C/Users/Hektor/Dropbox/Webb/javascript/mouse.js",
+		"/C/Users/Hektor/Desktop/Mikaela show/folk.md",
+		"/C/Users/Hektor/Dropbox/Webb/hemsida_innehåll.md",
+		"/C/Users/Hektor/Desktop/Mikaela show/meddelanden.md",
+		"/C/Users/Hektor/Desktop/Mikaela show/mikaela_show.md",
+		"/C/Users/Hektor/Dropbox/Webb/style.css",
+		"/C/Users/Hektor/Dropbox/Webb/javascript/fastclick.js",
+		"/C/Users/Hektor/Dropbox/Webb/fastclick.js",
+		"/C/Users/Hektor/AppData/Roaming/Sublime Text 2/Packages/User/canvas.sublime-snippet",
+		"/C/Users/Hektor/Dropbox/Webb/websockets/index.html",
+		"/C/Users/Hektor/Dropbox/Webb/Tentochu/index.php",
+		"/C/Users/Hektor/Dropbox/Webb/php/index.php",
+		"/C/Users/Hektor/Dropbox/Webb/spinningindex.php",
+		"/C/Users/Hektor/Desktop/The Bananas/Meddelande.md",
+		"/C/Users/Hektor/Desktop/labbhandledning_datastrukturer.txt",
+		"/C/Users/Hektor/Desktop/Mikaela show/sms_mall.md",
+		"/C/Users/Hektor/Desktop/mail.txt",
+		"/C/Users/Hektor/Desktop/mikaela_show.md",
+		"/C/Users/Hektor/Desktop/sms_mall.md",
+		"/C/Users/Hektor/Desktop/Tentochu analys/article_2.tex",
+		"/C/Users/Hektor/Dropbox/Skola/Kandidat/Uppsats_v4.tex",
+		"/C/Users/Hektor/Desktop/Tentochu analys/tentochu_analys.md",
+		"/C/Users/Hektor/Desktop/Tentochu analys/article_3.tex",
+		"/D/Tentochu Unity/Game Design/Game Design Document.doc",
+		"/C/Users/Hektor/Dropbox/Webb/javascript/loader.js",
+		"/C/Users/Hektor/Dropbox/Webb/click.html",
+		"/C/Users/Hektor/Dropbox/Webb/newminds/index.php",
+		"/C/Users/Hektor/AppData/Roaming/Sublime Text 2/Packages/Default/Preferences.sublime-settings",
+		"/C/Users/Hektor/Desktop/Tentochu analys/opponera_ville.md",
+		"/C/Users/Hektor/Desktop/Serverz/tentochu.settings",
+		"/C/Users/Hektor/Dropbox/Webb/natverk_pres/index.html",
+		"/C/Users/Hektor/Dropbox/Webb/reveal.js-template/index.html",
+		"/C/Users/Hektor/Dropbox/Webb/kandidat/presentation/css/style.css",
+		"/C/Users/Hektor/Dropbox/Webb/kandidat/presentation/js/index.js",
+		"/C/Users/Hektor/Dropbox/Webb/kandidat/presentation/upplägg.md",
+		"/C/Users/Hektor/Desktop/Kandidat/Bok_Hawez.md",
+		"/C/Users/Hektor/Desktop/Kandidat/lenander.md",
+		"/C/Users/Hektor/Dropbox/Webb/kandidat/presentation/index.php",
+		"/C/Users/Hektor/Dropbox/Skola/Kandidat/Anteckningar/retorik.md",
+		"/C/Users/Hektor/Dropbox/Webb/kandidat/js/measure.js",
+		"/C/Users/Hektor/Dropbox/Skola/Kandidat/Anteckningar/textanalys_egen.md",
+		"/C/Users/Hektor/Dropbox/Webb/kandidat/shaders/shader_simple.frag",
+		"/C/Users/Hektor/Dropbox/Webb/kandidat/shaders/shader_normalmap.frag",
+		"/C/Users/Hektor/Dropbox/Webb/presentation_tentochu/reveal.css",
+		"/C/Users/Hektor/Desktop/lenander.md",
+		"/C/Users/Hektor/Dropbox/Skola/Kandidat/Anteckningar/presentation_förseminarium.md",
+		"/C/Users/Hektor/Dropbox/Webb/kandidat/presentation/anteckningar.md",
+		"/C/Users/Hektor/Dropbox/Webb/kandidat/js/content.js",
+		"/C/Users/Hektor/Dropbox/Webb/floating/shaders/shader_parallax.frag",
+		"/C/Users/Hektor/Dropbox/Webb/floating/shaders/normal.frag",
+		"/C/Users/Hektor/Dropbox/Webb/javascript/webgl.js",
+		"/C/Users/Hektor/Dropbox/Webb/reveal.js-template/plugin/notes/notes.html",
+		"/C/Users/Hektor/Dropbox/Webb/kandidat/presentation/plugin/notes/notes.js",
+		"/C/Users/Hektor/Dropbox/Webb/kandidat/index.php",
+		"/C/Users/Hektor/Dropbox/Webb/kandidat/presentation/index.html",
+		"/C/Users/Hektor/Dropbox/Skola/Kandidat/Uppsats.tex",
+		"/C/Users/Hektor/Desktop/tentochu_analys.md",
+		"/C/Users/Hektor/Dropbox/Webb/floating/index.js",
+		"/C/Users/Hektor/Dropbox/Webb/webgl/Shaders/index.php",
+		"/C/Users/Hektor/Dropbox/Webb/audio/index.html",
+		"/C/Users/Hektor/Dropbox/Webb/floating/index.html",
+		"/C/Users/Hektor/Dropbox/Webb/webgl/Shaders/effect_webcam_cube.js",
+		"/C/Users/Hektor/Dropbox/Webb/webgl/Shaders/effect_cube.js",
+		"/C/Users/Hektor/Desktop/intervju.md",
+		"/C/Users/Hektor/Dropbox/Webb/javascript/camera.js",
+		"/C/Users/Hektor/Dropbox/Webb/javascript/light.js",
+		"/C/Users/Hektor/Dropbox/Webb/webgl/Shaders/effect_obj.js",
+		"/C/Users/Hektor/Dropbox/Webb/javascript/util.js",
+		"/C/Users/Hektor/Dropbox/Webb/webgl/Shaders/util.js",
+		"/C/Users/Hektor/Dropbox/Webb/webgl/Shaders/Camera.js",
+		"/C/Users/Hektor/Dropbox/Webb/webgl/Models/monkey_tex_smooth.mtl",
+		"/C/Users/Hektor/Dropbox/Webb/webgl/Shaders/index.html",
+		"/C/Users/Hektor/Dropbox/Webb/webgl/shroom/main.js",
+		"/C/Users/Hektor/Dropbox/Webb/oldindex.php",
+		"/C/Users/Hektor/Dropbox/Webb/javascript/dat.gui.js",
+		"/C/Users/Hektor/Dropbow/Webb/javascript/dat.gui.js",
+		"/C/Users/Hektor/Downloads/dat.gui.js",
+		"/D/Tentochu Unity/TentochuServer/tentochu.settings",
+		"/C/Users/Hektor/AppData/Roaming/Sublime Text 2/Packages/User/Preferences.sublime-settings",
+		"/C/Users/Hektor/Desktop/tentochu.md",
+		"/C/Users/Hektor/Dropbox/Webb/floating/floating.sublime-project",
+		"/C/Users/Hektor/Dropbox/Webb/webgl/Shaders/effect_simple.js",
+		"/C/Users/Hektor/Dropbox/Webb/kandidat/js/webgl.js",
+		"/C/Users/Hektor/Dropbox/Skola/Kandidat/parsetests.py",
+		"/C/Users/Hektor/Dropbox/Webb/kandidat/js/index.js",
+		"/C/Users/Hektor/Dropbox/Webb/kandidat/js/technique.js",
+		"/C/Users/Hektor/Dropbox/Webb/kandidat/js/game.js",
+		"/C/Users/Hektor/Desktop/icanhazinternet.py",
+		"/C/Users/Hektor/Desktop/localip.py",
+		"/C/Users/Hektor/Desktop/hardware.hta",
+		"/C/Users/Hektor/Dropbox/Webb/kandidat/js/util.js",
+		"/C/Users/Hektor/Dropbox/Webb/kandidat/js/controller.js",
+		"/C/Users/Hektor/Dropbox/Skola/Kandidat/tests/Stationär-192.168.0.194.md",
+		"/C/Users/Hektor/Dropbox/Skola/Kandidat/tests/Spellabbet-old.md",
+		"/C/Users/Hektor/Dropbox/Skola/Kandidat/tests/Spellabbet-new.md",
+		"/C/Users/Hektor/Dropbox/Skola/Kandidat/tests/Skola-datorsal.md",
+		"/C/Users/Hektor/Dropbox/Skola/Kandidat/tests/Laptop-192.168.0.196.md",
+		"/C/Users/Hektor/Dropbox/Skola/Kandidat/tests/Sats.md",
+		"/C/Users/Hektor/Dropbox/Skola/Kandidat/heavy.py",
+		"/C/Users/Hektor/Dropbox/Webb/kandidat/heavy.py",
+		"/C/Users/Hektor/Dropbox/Skola/Kandidat/tests/Spellabbet.md",
+		"/C/Users/Hektor/Dropbox/Skola/Kandidat/tests/WCczc22754s6.mah.se-195.178.233.85.md",
+		"/C/Users/Hektor/Dropbox/Skola/Kandidat/tests/192.168.0.196-192.168.0.196.md",
+		"/C/Users/Hektor/Dropbox/Skola/Kandidat/tests/192.168.0.194-192.168.0.194.md",
+		"/C/Users/Hektor/Dropbox/Skola/Kandidat/tests/projgw.ts.mah.se-195.178.232.15.md",
+		"/C/Users/Hektor/Dropbox/Webb/kandidat/measure.php",
+		"/C/Users/Hektor/Dropbox/Webb/kandidat/measures.md",
+		"/C/Users/Hektor/Dropbox/Webb/kandidat/measures.txt",
+		"/C/Users/Hektor/Dropbox/Webb/kandidat/js/keys.js",
+		"/C/Users/Hektor/Dropbox/Webb/kandidat/js/player.js",
+		"/C/Users/Hektor/Dropbox/Webb/kandidat/js/loader.js",
+		"/C/Users/Hektor/Dropbox/Webb/kandidat/js/measure.php",
+		"/C/Users/Hektor/Dropbox/Webb/kandidat/shaders/shader_delay.frag",
+		"/C/Users/Hektor/Dropbox/Webb/javascript/gl-matrix.js",
+		"/C/Users/Hektor/Dropbox/Webb/kandidat/js/light.js",
+		"/C/Users/Hektor/Desktop/bunny/reconstruction/README",
+		"/C/Users/Hektor/Desktop/bunny/data/README",
+		"/C/Users/Hektor/Dropbox/Webb/kandidat/js/camera.js",
+		"/C/Users/Hektor/Dropbox/Webb/kandidat/shaders/shader_parallax.frag",
+		"/C/Users/Hektor/Dropbox/Webb/kandidat/shaders/shader_parallax.vert",
+		"/C/Users/Hektor/Dropbox/Webb/kandidat/shaders/shader_normalmap.vert",
+		"/C/Users/Hektor/Dropbox/Webb/kandidat/shaders/shader_delay.vert",
+		"/C/Users/Hektor/Dropbox/Webb/kandidat/js/global.js",
+		"/C/Users/Hektor/Dropbox/Webb/presentation/tentochu.html"
+	],
+	"find":
+	{
+		"height": 34.0
+	},
+	"find_in_files":
+	{
+		"height": 0.0,
+		"where_history":
+		[
+			"C:\\Users\\Hektor\\Dropbox\\Webb\\kandidat\\js",
+			"C:\\Users\\Hektor\\Dropbox\\Webb\\webgl\\Models",
+			""
+		]
+	},
+	"find_state":
+	{
+		"case_sensitive": false,
+		"find_history":
+		[
+			"target_",
+			"size",
+			"out",
+			"f = ",
+			"f.",
+			"update",
+			"GAME",
+			"out",
+			"x",
+			"aspect_y",
+			"_x",
+			"relative_",
+			",",
+			"bases",
+			"Base",
+			"    ",
+			";",
+			"canvas.",
+			"document.",
+			"window.screen.avail",
+			"hovered",
+			"x",
+			");",
+			"TOUCH",
+			"touchDown",
+			"/2",
+			"/4",
+			"canvas",
+			"(ev)",
+			"ev",
+			"ev.",
+			"ctx",
+			"canvas",
+			"Touch",
+			"touch",
+			"Touch",
+			"touch",
+			"Touch",
+			"touch",
+			"Touch",
+			"touch",
+			"Touch",
+			"touch",
+			"old",
+			"});",
+			"dom.on(canvas,",
+			", ",
+			" ",
+			"x",
+			"start_",
+			":",
+			"x",
+			"mouse",
+			"0",
+			"arc",
+			"x",
+			":",
+			"x: -1, y: -1,",
+			"width",
+			"window",
+			"startTouch",
+			"e",
+			"ndTouch",
+			"e",
+			"mouse",
+			"m",
+			"mouse",
+			";",
+			"]",
+			"href=",
+			"<td>",
+			"td>",
+			"\"\">",
+			"(Antagligen)",
+			"[]",
+			"\n",
+			"[]",
+			":",
+			"/6)",
+			"6)",
+			"bernier:latency",
+			"*",
+			"Interpolering",
+			"interpolering",
+			"anal",
+			"subsection*",
+			"subsection",
+			"&",
+			"\\subsection",
+			"<b>",
+			":",
+			"p>",
+			"iv",
+			"speed",
+			"true",
+			"h2",
+			"itemize",
+			"2013",
+			"valve",
+			"Valve",
+			",",
+			"small",
+			"p>",
+			"span>",
+			"Delay",
+			"spawn",
+			"fragment",
+			"p>",
+			"DAS",
+			"aside class=\"notes\"",
+			"<h2",
+			"]",
+			"fragment-not",
+			"-not",
+			"h2",
+			"Detail",
+			"Detial",
+			"p>",
+			"<section",
+			"\n                        ",
+			",",
+			"h1",
+			"\n                        ",
+			"\n                            ",
+			"analysdel",
+			"1.0",
+			"2.0",
+			"4s"
+		],
+		"highlight": true,
+		"in_selection": false,
+		"preserve_case": false,
+		"regex": false,
+		"replace_history":
+		[
+			"{\\n}",
+			"{\\n",
+			"player",
+			"player.rigid",
+			"",
+			"ct.programs['simple']",
+			"content.te",
+			"content.mo",
+			"content.textures",
+			"content.images",
+			"content.models",
+			"gl",
+			"gl\ngl",
+			"already",
+			"slurp_replace_string",
+			"\"",
+			"this",
+			"vertexBuffer",
+			"a_position",
+			"program",
+			"cornerBuffer",
+			"player_ids",
+			"current_screen_name",
+			"colorShaderProgram",
+			"$themefile",
+			"$wishfile",
+			"text_color",
+			"stitch_color",
+			"span",
+			"link"
+		],
+		"reverse": false,
+		"show_context": true,
+		"use_buffer2": true,
+		"whole_word": false,
+		"wrap": true
+	},
+	"groups":
+	[
+		{
+			"selected": 1,
+			"sheets":
+			[
+				{
+					"buffer": 0,
+					"file": "/C/Users/Hektor/Dropbox/Webb/TouchShroom/index.html",
+					"settings":
+					{
+						"buffer_size": 678,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"BracketHighlighterBusy": false,
+							"annotations":
+							[
+								"TODO",
+								"README",
+								"FIXME"
+							],
+							"bh_regions":
+							[
+								"bh_regex",
+								"bh_regex_center",
+								"bh_regex_open",
+								"bh_regex_close",
+								"bh_double_quote",
+								"bh_double_quote_center",
+								"bh_double_quote_open",
+								"bh_double_quote_close",
+								"bh_square",
+								"bh_square_center",
+								"bh_square_open",
+								"bh_square_close",
+								"bh_angle",
+								"bh_angle_center",
+								"bh_angle_open",
+								"bh_angle_close",
+								"bh_curly",
+								"bh_curly_center",
+								"bh_curly_open",
+								"bh_curly_close",
+								"bh_default",
+								"bh_default_center",
+								"bh_default_open",
+								"bh_default_close",
+								"bh_unmatched",
+								"bh_unmatched_center",
+								"bh_unmatched_open",
+								"bh_unmatched_close",
+								"bh_round",
+								"bh_round_center",
+								"bh_round_open",
+								"bh_round_close",
+								"bh_tag",
+								"bh_tag_center",
+								"bh_tag_open",
+								"bh_tag_close",
+								"bh_single_quote",
+								"bh_single_quote_center",
+								"bh_single_quote_open",
+								"bh_single_quote_close"
+							],
+							"csslint_options":
+							{
+								"adjoining-classes": "warning",
+								"box-model": true,
+								"box-sizing": "warning",
+								"compatible-vendor-prefixes": "warning",
+								"display-property-grouping": true,
+								"duplicate-background-images": "warning",
+								"duplicate-properties": true,
+								"empty-rules": true,
+								"errors": true,
+								"fallback-colors": "warning",
+								"floats": "warning",
+								"font-faces": "warning",
+								"font-sizes": "warning",
+								"gradients": "warning",
+								"ids": "warning",
+								"import": "warning",
+								"important": "warning",
+								"known-properties": true,
+								"outline-none": "warning",
+								"overqualified-elements": "warning",
+								"qualified-headings": "warning",
+								"regex-selectors": "warning",
+								"rules-count": "warning",
+								"shorthand": "warning",
+								"star-property-hack": "warning",
+								"text-indent": "warning",
+								"underscore-property-hack": "warning",
+								"unique-headings": "warning",
+								"universal-selector": "warning",
+								"vendor-prefix": true,
+								"zero-units": "warning"
+							},
+							"gjslint_ignore":
+							[
+								110.0
+							],
+							"gjslint_options":
+							[
+							],
+							"javascript_linter": "jshint",
+							"jshint_options":
+							{
+								"browser": true,
+								"evil": true,
+								"regexdash": true,
+								"sub": true,
+								"trailing": true,
+								"wsh": true
+							},
+							"pep8": true,
+							"pep8_ignore":
+							[
+								"E501"
+							],
+							"perl_linter": "perlcritic",
+							"pyflakes_ignore":
+							[
+							],
+							"pyflakes_ignore_import_*": true,
+							"sublimelinter": true,
+							"sublimelinter_delay": 2.0,
+							"sublimelinter_disable":
+							[
+							],
+							"sublimelinter_executable_map":
+							{
+							},
+							"sublimelinter_fill_outlines": false,
+							"sublimelinter_gutter_marks": true,
+							"sublimelinter_gutter_marks_theme": "simple",
+							"sublimelinter_mark_style": "none",
+							"sublimelinter_notes": false,
+							"sublimelinter_objj_check_ascii": false,
+							"sublimelinter_popup_errors_on_save": false,
+							"sublimelinter_syntax_map":
+							{
+								"C++": "c",
+								"Python Django": "python",
+								"Ruby on Rails": "ruby"
+							},
+							"sublimelinter_wrap_find": true,
+							"syntax": "Packages/HTML/HTML.tmLanguage",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 1,
+					"file": "game.js",
+					"settings":
+					{
+						"buffer_size": 12909,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								561,
+								561
+							]
+						],
+						"settings":
+						{
+							"BracketHighlighterBusy": false,
+							"annotations":
+							[
+								"TODO",
+								"README",
+								"FIXME"
+							],
+							"bh_regions":
+							[
+								"bh_regex",
+								"bh_regex_center",
+								"bh_regex_open",
+								"bh_regex_close",
+								"bh_double_quote",
+								"bh_double_quote_center",
+								"bh_double_quote_open",
+								"bh_double_quote_close",
+								"bh_square",
+								"bh_square_center",
+								"bh_square_open",
+								"bh_square_close",
+								"bh_angle",
+								"bh_angle_center",
+								"bh_angle_open",
+								"bh_angle_close",
+								"bh_curly",
+								"bh_curly_center",
+								"bh_curly_open",
+								"bh_curly_close",
+								"bh_default",
+								"bh_default_center",
+								"bh_default_open",
+								"bh_default_close",
+								"bh_unmatched",
+								"bh_unmatched_center",
+								"bh_unmatched_open",
+								"bh_unmatched_close",
+								"bh_round",
+								"bh_round_center",
+								"bh_round_open",
+								"bh_round_close",
+								"bh_tag",
+								"bh_tag_center",
+								"bh_tag_open",
+								"bh_tag_close",
+								"bh_single_quote",
+								"bh_single_quote_center",
+								"bh_single_quote_open",
+								"bh_single_quote_close"
+							],
+							"csslint_options":
+							{
+								"adjoining-classes": "warning",
+								"box-model": true,
+								"box-sizing": "warning",
+								"compatible-vendor-prefixes": "warning",
+								"display-property-grouping": true,
+								"duplicate-background-images": "warning",
+								"duplicate-properties": true,
+								"empty-rules": true,
+								"errors": true,
+								"fallback-colors": "warning",
+								"floats": "warning",
+								"font-faces": "warning",
+								"font-sizes": "warning",
+								"gradients": "warning",
+								"ids": "warning",
+								"import": "warning",
+								"important": "warning",
+								"known-properties": true,
+								"outline-none": "warning",
+								"overqualified-elements": "warning",
+								"qualified-headings": "warning",
+								"regex-selectors": "warning",
+								"rules-count": "warning",
+								"shorthand": "warning",
+								"star-property-hack": "warning",
+								"text-indent": "warning",
+								"underscore-property-hack": "warning",
+								"unique-headings": "warning",
+								"universal-selector": "warning",
+								"vendor-prefix": true,
+								"zero-units": "warning"
+							},
+							"gjslint_ignore":
+							[
+								110.0
+							],
+							"gjslint_options":
+							[
+							],
+							"javascript_linter": "jshint",
+							"jshint_options":
+							{
+								"browser": true,
+								"evil": true,
+								"regexdash": true,
+								"sub": true,
+								"trailing": true,
+								"wsh": true
+							},
+							"pep8": true,
+							"pep8_ignore":
+							[
+								"E501"
+							],
+							"perl_linter": "perlcritic",
+							"pyflakes_ignore":
+							[
+							],
+							"pyflakes_ignore_import_*": true,
+							"sublimelinter": true,
+							"sublimelinter_delay": 2.0,
+							"sublimelinter_disable":
+							[
+							],
+							"sublimelinter_executable_map":
+							{
+							},
+							"sublimelinter_fill_outlines": false,
+							"sublimelinter_gutter_marks": true,
+							"sublimelinter_gutter_marks_theme": "simple",
+							"sublimelinter_mark_style": "none",
+							"sublimelinter_notes": false,
+							"sublimelinter_objj_check_ascii": false,
+							"sublimelinter_popup_errors_on_save": false,
+							"sublimelinter_syntax_map":
+							{
+								"C++": "c",
+								"Python Django": "python",
+								"Ruby on Rails": "ruby"
+							},
+							"sublimelinter_wrap_find": true,
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				}
+			]
+		}
+	],
+	"incremental_find":
+	{
+		"height": 34.0
+	},
+	"input":
+	{
+		"height": 31.0
+	},
+	"layout":
+	{
+		"cells":
+		[
+			[
+				0,
+				0,
+				1,
+				1
+			]
+		],
+		"cols":
+		[
+			0.0,
+			1.0
+		],
+		"rows":
+		[
+			0.0,
+			1.0
+		]
+	},
+	"menu_visible": false,
+	"output.exec":
+	{
+		"height": 100.0
+	},
+	"output.git":
+	{
+		"height": 100.0
+	},
+	"replace":
+	{
+		"height": 62.0
+	},
+	"save_all_on_build": true,
+	"select_file":
+	{
+		"height": 0.0,
+		"selected_items":
+		[
+			[
+				"inde",
+				"index.php"
+			],
+			[
+				"sequinde",
+				"Sequencer/index.html"
+			],
+			[
+				"oldtouch",
+				"Old/touch/index.html"
+			],
+			[
+				"javmou",
+				"javascript/mouse.js"
+			],
+			[
+				"javamous",
+				"javascript/mouse.js"
+			],
+			[
+				"javauti",
+				"javascript/util.js"
+			],
+			[
+				"sequencer",
+				"Sequencer/index.html"
+			],
+			[
+				"style.css",
+				"style.css"
+			],
+			[
+				"websockinde",
+				"websockets/index.html"
+			],
+			[
+				"load",
+				"javascript/loader.js"
+			],
+			[
+				".html",
+				"click.html"
+			],
+			[
+				"phpin",
+				"php/index.php"
+			],
+			[
+				"index",
+				"index.php"
+			],
+			[
+				"",
+				"/C/Users/Hektor/Dropbox/Skola/Kandidat/Uppsats_v4.tex"
+			],
+			[
+				"presstyl",
+				"kandidat/presentation/css/style.css"
+			],
+			[
+				"meas",
+				"kandidat/js/measure.js"
+			],
+			[
+				"simpl",
+				"kandidat/shaders/shader_simple.frag"
+			],
+			[
+				"normfrag",
+				"kandidat/shaders/shader_normalmap.frag"
+			],
+			[
+				"presecss",
+				"presentation_tentochu/reveal.css"
+			],
+			[
+				"presindejs",
+				"kandidat/presentation/js/index.js"
+			],
+			[
+				"presstcss",
+				"kandidat/presentation/css/style.css"
+			],
+			[
+				"presinde",
+				"kandidat/presentation/index.php"
+			],
+			[
+				"kanpresmd",
+				"kandidat/presentation/upplägg.md"
+			],
+			[
+				"normalm",
+				"kandidat/shaders/shader_normalmap.frag"
+			],
+			[
+				"norm",
+				"floating/shaders/normal.frag"
+			],
+			[
+				"parall",
+				"floating/shaders/shader_parallax.frag"
+			],
+			[
+				"measu",
+				"kandidat/js/measure.js"
+			],
+			[
+				"conte",
+				"kandidat/js/content.js"
+			],
+			[
+				"webg",
+				"javascript/webgl.js"
+			],
+			[
+				"notes.",
+				"reveal.js-template/plugin/notes/notes.html"
+			],
+			[
+				"kandpresjs",
+				"kandidat/presentation/plugin/notes/notes.js"
+			],
+			[
+				"kandinde",
+				"kandidat/index.php"
+			],
+			[
+				"presncss/st",
+				"kandidat/presentation/css/style.css"
+			],
+			[
+				"preseind",
+				"kandidat/presentation/index.html"
+			],
+			[
+				"presindex",
+				"kandidat/presentation/js/index.js"
+			],
+			[
+				"float",
+				"floating/index.js"
+			],
+			[
+				"presentainde",
+				"kandidat/presentation/js/index.js"
+			],
+			[
+				"audi",
+				"audio/index.html"
+			],
+			[
+				"floatind",
+				"floating/index.html"
+			],
+			[
+				"shadersind",
+				"webgl/Shaders/index.php"
+			],
+			[
+				"kandme",
+				"kandidat/js/measure.js"
+			],
+			[
+				"audiind",
+				"audio/index.html"
+			],
+			[
+				"audio",
+				"audio/index.html"
+			],
+			[
+				"javacame",
+				"javascript/camera.js"
+			],
+			[
+				"floatindex",
+				"floating/index.js"
+			],
+			[
+				"javalig",
+				"javascript/light.js"
+			],
+			[
+				"javaload",
+				"javascript/loader.js"
+			],
+			[
+				"jav",
+				"javascript/util.js"
+			],
+			[
+				"javuti",
+				"javascript/util.js"
+			],
+			[
+				"shadeuti",
+				"webgl/Shaders/util.js"
+			],
+			[
+				"shadercamer",
+				"webgl/Shaders/Camera.js"
+			],
+			[
+				"shroom",
+				"webgl/shroom/main.js"
+			],
+			[
+				"shaderseffec",
+				"webgl/Shaders/effect_obj.js"
+			],
+			[
+				"shaderinde",
+				"webgl/Shaders/index.html"
+			],
+			[
+				"old",
+				"oldindex.php"
+			],
+			[
+				"floatin",
+				"floating/index.js"
+			],
+			[
+				"we",
+				"js/webgl.js"
+			],
+			[
+				"util",
+				"js/util.js"
+			],
+			[
+				"contr",
+				"js/controller.js"
+			],
+			[
+				"game",
+				"js/game.js"
+			],
+			[
+				"tech",
+				"js/technique.js"
+			],
+			[
+				"uti",
+				"js/util.js"
+			],
+			[
+				"loade",
+				"js/loader.js"
+			],
+			[
+				"pla",
+				"js/player.js"
+			],
+			[
+				"keys",
+				"js/keys.js"
+			],
+			[
+				"measure",
+				"js/measure.js"
+			],
+			[
+				"ind",
+				"index.php"
+			],
+			[
+				"ut",
+				"js/util.js"
+			],
+			[
+				"del",
+				"shaders/shader_delay.frag"
+			],
+			[
+				"te",
+				"js/technique.js"
+			],
+			[
+				"ligh",
+				"js/light.js"
+			],
+			[
+				"camer",
+				"js/camera.js"
+			],
+			[
+				"camera",
+				"js/camera.js"
+			],
+			[
+				"ke",
+				"js/keys.js"
+			],
+			[
+				"shanorma",
+				"shaders/shader_normalmap.frag"
+			],
+			[
+				"webgl",
+				"js/webgl.js"
+			],
+			[
+				"con",
+				"js/controller.js"
+			],
+			[
+				"shadsimp",
+				"shaders/shader_simple.frag"
+			],
+			[
+				"shanorm",
+				"shaders/shader_normalmap.frag"
+			],
+			[
+				"shadenorma",
+				"shaders/shader_normalmap.frag"
+			],
+			[
+				"shadesimpl",
+				"shaders/shader_simple.frag"
+			],
+			[
+				"gam",
+				"js/game.js"
+			],
+			[
+				"lig",
+				"js/light.js"
+			],
+			[
+				"web",
+				"js/webgl.js"
+			],
+			[
+				"i",
+				"index.php"
+			],
+			[
+				"parla",
+				"shaders/shader_parallax.frag"
+			],
+			[
+				"paral",
+				"shaders/shader_parallax.vert"
+			],
+			[
+				"shade",
+				"shaders/shader_simple.frag"
+			],
+			[
+				"tec",
+				"js/technique.js"
+			],
+			[
+				"li",
+				"js/light.js"
+			],
+			[
+				"came",
+				"js/camera.js"
+			],
+			[
+				"measur",
+				"js/measure.js"
+			],
+			[
+				"ath",
+				"math.html"
+			],
+			[
+				"shadernorm",
+				"shaders/shader_normalmap.frag"
+			],
+			[
+				"shadersim",
+				"shaders/shader_simple.frag"
+			],
+			[
+				"loader",
+				"js/loader.js"
+			],
+			[
+				"play",
+				"js/player.js"
+			],
+			[
+				"shader",
+				"shaders/shader_simple.vert"
+			],
+			[
+				"time",
+				"js/time.js"
+			],
+			[
+				"shadernorma",
+				"shaders/shader_normalmap.frag"
+			],
+			[
+				"model",
+				"js/model.js"
+			],
+			[
+				"shader_",
+				"shaders/shader_normalmap.frag"
+			],
+			[
+				"conten",
+				"js/content.js"
+			],
+			[
+				"sha",
+				"shaders/shader_simple.frag"
+			],
+			[
+				"vert",
+				"shaders/shader_normalmap.vert"
+			],
+			[
+				"f",
+				"shaders/shader_normalmap.frag"
+			],
+			[
+				"conr",
+				"js/controller.js"
+			],
+			[
+				"cont",
+				"js/content.js"
+			],
+			[
+				"styl",
+				"css/style.css"
+			],
+			[
+				"player",
+				"js/player.js"
+			],
+			[
+				"simple",
+				"shaders/shader_simple.vert"
+			],
+			[
+				"content",
+				"js/content.js"
+			],
+			[
+				"cann",
+				"js/cannon.js"
+			],
+			[
+				"index.js",
+				"js/index.js"
+			],
+			[
+				"shadersimp",
+				"shaders/shader_simple.frag"
+			],
+			[
+				"verte",
+				"shaders/vertex.vert"
+			],
+			[
+				"frag",
+				"shaders/fragment.frag"
+			],
+			[
+				"ver",
+				"shaders/vertex.vert"
+			],
+			[
+				"fragm",
+				"shaders/fragment.frag"
+			],
+			[
+				"loa",
+				"js/loader.js"
+			],
+			[
+				"in",
+				"index.php"
+			],
+			[
+				"style",
+				"css/style.css"
+			],
+			[
+				"stat",
+				"js/stats.min.js"
+			],
+			[
+				"su",
+				"kandidat.sublime-project"
+			],
+			[
+				"sty",
+				"css/style.css"
+			],
+			[
+				"a",
+				"anim.php"
+			],
+			[
+				"shareitindex",
+				"shareit/client/index.html"
+			],
+			[
+				"anim",
+				"anim.php"
+			]
+		],
+		"width": 0.0
+	},
+	"select_project":
+	{
+		"height": 500.0,
+		"selected_items":
+		[
+			[
+				"",
+				"/C/Users/Hektor/Dropbox/Webb/webb.sublime-project"
+			],
+			[
+				"kan",
+				"/C/Users/Hektor/Dropbox/Webb/kandidat/kandidat.sublime-project"
+			]
+		],
+		"width": 380.0
+	},
+	"show_minimap": true,
+	"show_open_files": false,
+	"show_tabs": true,
+	"side_bar_visible": true,
+	"side_bar_width": 167.0,
+	"status_bar_visible": true
+}

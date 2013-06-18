@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
+    <meta content='width=device-width, initial-scale=1.0, user-scalable=no' name='viewport' />
+    <title>Shrooms!</title>
+
+    <!-- CSS -->
+    <link rel="stylesheet" type="text/css" href="style.css">
+
+    <!-- JAVASCRIPT -->
+    <script defer type="text/javascript" src="js/socket.io.js"></script>
+    <script defer type="text/javascript" src="js/game.js"></script>
+
+    <script>
+        window.onerror = function(e){
+            alert(e);
+        };
+    </script>
+</head>
+<body>
+    <div id="no_connect_msg" class='centered_msg hidden'>
+        <div>
+            <h2>Could not connect to server :(</h2>
+        </div>
+    </div>
+    <div id="connected_msg" class='centered_msg hidden'>
+        <div>
+            <h2>Connected :)</h2>
+        </div>
+    </div>
+    <div id="loading_msg" class="centered_msg">
+        <div>
+            <h2>Loading...</h2>
+        </div>
+    </div>
+    <div id="output"></div>
+    <canvas id="canvas" width="600" height="400">
+        <p>Your browser doesn't seem to support the Canvas :(.</p>
+    </canvas>
+</body>
+</html>
