@@ -108,6 +108,7 @@ var GAME = {
 /**
  * { INIT }
  * Main entry point for initialization
+ * General initialization not bound to a game instance
  */
 GAME.init = function(){
     NET.init();
@@ -192,13 +193,19 @@ GAME.init = function(){
         drag(e.changedTouches[0].pageX, e.changedTouches[0].pageY);
     }, false);
     window.addEventListener('resize', GAME.resize, false);
-
-
-    ////////////////
-    // START GAME //
-    ////////////////
-    GAME.now = GAME.last_time = window.performance.now();
-    window.requestAnimationFrame(GAME.loop);
+};
+/**
+ * { SETUP }
+ * Setup a specific game with info from server
+ * @param  {Object} data  Setup data from server (players, level)
+ */
+GAME.setup = function(data){
+    var lvl = data.level;
+    var my_id = data.my_id;
+    var players = data.players;
+    out('Level', lvl);
+    out('My id', my_id);
+    out('Players', players);
 };
 /**
  * { RESIZE }
@@ -214,6 +221,14 @@ GAME.resize = function(){
     GAME.bases.forEach(r);
     GAME.minions.forEach(r);
     GAME.particles.forEach(r);
+};
+/**
+ * { START }
+ * Starts the game
+ */
+GAME.start = function(){
+    GAME.now = GAME.last_time = window.performance.now();
+    window.requestAnimationFrame(GAME.loop);
 };
 /**
  * { LOOP }

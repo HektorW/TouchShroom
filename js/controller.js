@@ -1,3 +1,16 @@
+/** TODO
+ *
+ * { GAME }
+ * -    Get information about players in game
+ *         Save players in some list
+ * -    Get information about game
+ * -    Bind listeners for game
+ *         Save listener to be able to remove
+ * -    Count down start -> start game
+ * -    Game logic
+ */
+
+
 var CONTROLLER = {
     current_screen: null
 };
@@ -6,6 +19,7 @@ var CONTROLLER = {
  */
 CONTROLLER.init = function(){
     NET.init();
+    GAME.init();
 
     CONTROLLER.current_screen = 'loading';
 
@@ -22,6 +36,10 @@ CONTROLLER.bindevents = function(){
     });
 };
 
+/**
+ * { RESUQEST PLAY }
+ * Called when client clicks 'Play'
+ */
 CONTROLLER.requestPlay = function(){
     NET.send('CLIENT.play');
     CONTROLLER.setScreen('waiting');
@@ -70,9 +88,6 @@ CONTROLLER.disconnected = function(){
  */
 CONTROLLER.startgame = function(){
     CONTROLLER.setScreen('game');
-    var ctx = DOM('#canvas').getContext('2d');
-    ctx.fillStyle = 'red';
-    ctx.fillRect(0, 0, GAME.width, GAME.height);
 };
 
 
@@ -116,11 +131,17 @@ NET.init = function(){
     });
 
 
-    this.socket.on('SERVER.game', function(){
+    this.socket.on('SERVER.initgame', function(){
         CONTROLLER.startgame();
     });
 
 
+    //////////
+    // GAME //
+    //////////
+    this.socket.on('GAME.setup', function(data){
+        GAME.setup(data);
+    });
 
     //////////
     // GAME //
@@ -249,18 +270,19 @@ var out = (function(){
 
     var f = function(){
         var args = arguments;
-        var name;
+        var name, msg;
 
         switch(args.length){
             case 1: {
-                newElem(args[0]);
+                newElem(JSON.stringify(args[0]));
             } break;
             case 2: {
                 name = args[0];
+                msg = JSON.stringify(args[1]);
                 if(msgs[name]){
-                    msgs[name].innerHTML = name + ': ' + args[1];
+                    msgs[name].innerHTML = name + ': ' + msg;
                 } else {
-                    msgs[name] = newElem(args[1], name);
+                    msgs[name] = newElem(msg, name);
                 }
             } break;
         }
