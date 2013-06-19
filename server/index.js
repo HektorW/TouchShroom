@@ -1,5 +1,5 @@
 var io = require('socket.io').listen(8888);
-io.set('log level', 2);
+io.set('log level', 1);
 
 
 /** [ CONTROLLER ]
@@ -7,57 +7,140 @@ io.set('log level', 2);
  */
 var CONTROLLER = {
     clients: [],
+    game_queue: [],
     games: []
 };
+/**
+ * { CONNECTION }
+ * @param  {Socket} socket
+ */
 CONTROLLER.connection = function(socket){
     // SETUP CLIENT
-    CONTROLLER.clients.push(socket);
+    var client = new Client(socket);
+    CONTROLLER.clients.push(client);
 
     /////////////////
     // BIND EVENTS //
     /////////////////
     socket.on('disconnect', function(){
-        CONTROLLER.remove(socket);
+        CONTROLLER.remove(client);
+    });
+
+    socket.on('CLIENT.play', function(){
+        CONTROLLER.clientPlayRequest(client);
     });
 
 
-    socket.emit('C.num_players', {num_players: CONTROLLER.clients.length});
+    socket.emit('SERVER.num_players', {num_players: CONTROLLER.clients.length});
 };
-CONTROLLER.remove = function(socket){
+/**
+ * { REMOVE }
+ * Remove client
+ * @param  {Socket} socket
+ */
+CONTROLLER.remove = function(client){
     var index = -1;
     CONTROLLER.clients.forEach(function(e, i){
-        if(e.id === socket.id)
+        if(e.id === client.id)
             index = i;
     });
     if(index != -1)
         CONTROLLER.clients.splice(index, 1);
 };
+/**
+ * { CLIENT PLAY REQUEST }
+ * Called when a client wants to play
+ * Checks if other clients want to play, otherwise put in Q
+ * @param  {Client} client
+ */
+CONTROLLER.clientPlayRequest = function(client){
+    if(CONTROLLER.game_queue.length > 0){
+
+        CONTROLLER.startgame([
+                CONTROLLER.game_queue.shift(),
+                client
+            ]);
+    } else {
+        CONTROLLER.game_queue.push(client);
+    }
+};
+/**
+ * { START GAME }
+ * Start a new game with clients
+ * @param  {Array} clients  Array of clients to play
+ */
+CONTROLLER.startgame = function(clients){
+    var g = new Game(clients);
+    clients.forEach(function(c){
+        c.status = 'ingame';
+        c.game_id = g.id;
+
+        c.send('SERVER.game', {});
+    });
+};
+
+
+
+
+
+
+/** [ CLIENT ]
+ * 
+ */
+function Client(socket){
+    this.socket = socket;
+
+    this.id = uniqueID('client');
+    this.status = 'none';
+
+    this.game_id = -1;
+}
+/**
+ * { SEND }
+ * Sends data to client of msg-type
+ * @param  {String} msg     Message-type
+ * @param  {Object} data    Data to send
+ */
+Client.prototype.send = function(msg, data) {
+    this.socket.emit(msg, data);
+};
+
+
+
+
+
 
 
 /** [ GAME ]
- * 
+ * Instance of a game
  */
-var GAME = {
-    player_list: [],
-    players: []
-};
+function Game(clients){
+    this.player_list = [];
+    var game = this;
+    clients.forEach(function(c){
+        var p = new Player(c);
+        game.player_list.push(p);
+    });
+
+    this.id = uniqueID('game');
+}
 /**
  * { INIT }
  */
-GAME.init = function(){
+Game.prototype.init = function(){
 };
 /**
  * { UPDATE }
  * @param  {Number} t   Elapsed time since last update
  */
-GAME.update = function(t){
+Game.prototype.update = function(t){
 };
 
 /**
  * { NEW CONNECTION }
  * @param  {Socket} socket  Connected socket
  */
-GAME.connection = function(socket){
+Game.prototype.connection = function(socket){
     var p = new Player(socket);
 
     /////////////////
@@ -75,7 +158,7 @@ GAME.connection = function(socket){
 
     // MINION
     socket.on('p.minion', function(data){
-        GAME.broadcast('b.minion', data);
+        this.broadcast('b.minion', data);
     });
 
 
@@ -87,8 +170,6 @@ GAME.connection = function(socket){
     // All other players
     GAME.sendAllPlayers(socket);
 
-    // this.players[socket.id] = p;
-
     // Announce and add to game
     GAME.player_list.push(p);
     GAME.broadcast('p.connection', setup_data);
@@ -97,8 +178,7 @@ GAME.connection = function(socket){
  * { DISCONNECTION }
  * @param  {Socket} socket  Disconnected socket
  */
-GAME.disconnection = function(socket){
-    // delete this.players[socket.id];
+Game.prototype.disconnection = function(socket){
     for(var i = 0; i < this.player_list.length; i++){
         if(this.player_list[i].socket.id === socket.id){
 
@@ -115,12 +195,12 @@ GAME.disconnection = function(socket){
  * @param  {String} type    Identifier for message
  * @param  {Object} data    Data to be sent
  */
-GAME.broadcast = function(type, data){
+Game.prototype.broadcast = function(type, data){
     for (var i = this.player_list.length - 1; i >= 0; i--) {
         this.player_list[i].socket.emit(type, data);
     }
 };
-GAME.sendAllPlayers = function(socket){
+Game.prototype.sendAllPlayers = function(socket){
     var i;
     var data = {
         players: []
@@ -138,13 +218,17 @@ GAME.sendAllPlayers = function(socket){
 
 
 
+
+
+
 /** [ PLAYER ]
  * 
  */
-function Player(socket, color){
-    this.socket = socket;
+function Player(client){
+    this.client = client;
+    this.socket = client.socket;
     this.color = randomColor();
-    this.player_id = uniqueID();
+    this.id = uniqueID('player');
 
     this.aspect_left = randomRangeInt(1, 10) / 10;
     this.aspect_top = randomRangeInt(1, 10) / 10;
@@ -160,6 +244,11 @@ Player.prototype.setupJSON = function() {
         aspect_size : self.aspect_size
     };
 };
+
+
+
+
+
 
 
 
@@ -223,6 +312,14 @@ var uniqueID = (function(){
 
         return id++;
     };
+})();
+
+var log = (function(){
+    var f = function(){
+        console.log(arguments);
+    };
+
+    return f;
 })();
 
 

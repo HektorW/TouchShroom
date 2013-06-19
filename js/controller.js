@@ -9,12 +9,29 @@ CONTROLLER.init = function(){
 
     CONTROLLER.current_screen = 'loading';
 
-
+    CONTROLLER.bindevents();
+};
+/**
+ * { BIND EVENTS }
+ * Binds listeners and flow logic
+ */
+CONTROLLER.bindevents = function(){
     // Setup listeners
     DOM.on('#btn_play', 'click', function(){
-        CONTROLLER.setScreen('waiting');
+        CONTROLLER.requestPlay();
     });
 };
+
+CONTROLLER.requestPlay = function(){
+    NET.send('CLIENT.play');
+    CONTROLLER.setScreen('waiting');
+};
+
+/**
+ * { SET SCREEN }
+ * Sets the active screen
+ * @param  {String} screen  Name for the screen, e.g game/start/loading, !NOT HTML-DOM-id, e.g #screen_game!
+ */
 CONTROLLER.setScreen = function(screen){
     var s = DOM('#screen_' + screen);
     if(s){
@@ -24,7 +41,6 @@ CONTROLLER.setScreen = function(screen){
         DOM.removeClass(s, 'hidden');
     }
 };
-
 /**
  * { CONNECTED }
  */
@@ -46,6 +62,17 @@ CONTROLLER.noconnect = function(){
 CONTROLLER.disconnected = function(){
     timed('Disconnected from server!');
     CONTROLLER.setScreen('noconnect');
+};
+
+/**
+ * { START GAME }
+ * Starts game
+ */
+CONTROLLER.startgame = function(){
+    CONTROLLER.setScreen('game');
+    var ctx = DOM('#canvas').getContext('2d');
+    ctx.fillStyle = 'red';
+    ctx.fillRect(0, 0, GAME.width, GAME.height);
 };
 
 
@@ -84,8 +111,13 @@ NET.init = function(){
     ////////////////
     // CONTROLLER //
     ////////////////
-    this.socket.on('C.num_players', function(data){
+    this.socket.on('SERVER.num_players', function(data){
         timed('Players online: ' + data.num_players);
+    });
+
+
+    this.socket.on('SERVER.game', function(){
+        CONTROLLER.startgame();
     });
 
 
@@ -149,6 +181,15 @@ NET.init = function(){
                 );
         }
     });
+};
+/**
+ * { SEND }
+ * Sends data to server of msg-type
+ * @param  {String} msg     Message-type
+ * @param  {Object} data    Data to send
+ */
+NET.send = function(msg, data){
+    NET.socket.emit(msg, data);
 };
 
 
