@@ -5,11 +5,11 @@
  *         or other way of choosing opponent
  * 
  * { GAME }
- * -    Say that player is joining game
+ * -    Say that player is joining game (DONE)
  * -    Bind listeners to all events
  *         Save listeners on player so they can be removed
- * -    Send information about all players in game
- * -    Send information about game
+ * -    Send information about all players in game (DONE)
+ * -    Send information about game (DONE)
  *         Create some kind of level
  *         Create bases
  * -    Start countdown -> start game
@@ -20,7 +20,7 @@
 var io = require('socket.io').listen(8888);
 io.set('log level', 1);
 
-
+// --------------------------------------------------------------
 /** [ CONTROLLER ]
  * 
  */
@@ -101,7 +101,7 @@ CONTROLLER.startgame = function(clients){
 
 
 
-
+// --------------------------------------------------------------
 /** [ CLIENT ]
  * 
  */
@@ -129,6 +129,8 @@ Client.prototype.send = function(msg, data) {
 
 
 
+
+// --------------------------------------------------------------
 /** [ GAME ]
  * Instance of a game
  */
@@ -138,7 +140,7 @@ function Game(clients){
     /////////////
     // PLAYERS //
     /////////////
-    this.player_list = [];
+    this.players = [];
     var game = this;
     clients.forEach(function(c){
         c.status = 'ingame';
@@ -146,7 +148,7 @@ function Game(clients){
         c.send('SERVER.initgame');
 
         var p = new Player(c);
-        game.player_list.push(p);
+        game.players.push(p);
     });
 
     ///////////
@@ -166,18 +168,18 @@ Game.prototype.init = function(){
     // Object for all setup data
     var setup_data = {
         my_id: -1,
-        players: [],
+        players: this.players.map(function(p){ return p.setupJSON(); }),
         level: this.level.setupJSON()
     };
 
     // Add player info to setup_data
-    this.player_list.forEach(function(p){
-        setup_data.players.push(p.setupJSON());
-    });
+    // this.players.forEach(function(p){
+    //     setup_data.players.push(p.setupJSON());
+    // });
 
 
     // Send setup data
-    this.player_list.forEach(function(p){
+    this.players.forEach(function(p){
         // !May be dangerous, but should probably work!
         setup_data.my_id = p.id;
         // Send it
@@ -226,20 +228,26 @@ Game.prototype.connection = function(socket){
     GAME.sendAllPlayers(socket);
 
     // Announce and add to game
-    GAME.player_list.push(p);
+    GAME.players.push(p);
     GAME.broadcast('p.connection', setup_data);
 };
 /**
  * { DISCONNECTION }
  * @param  {Socket} socket  Disconnected socket
  */
-Game.prototype.disconnection = function(socket){
-    for(var i = 0; i < this.player_list.length; i++){
-        if(this.player_list[i].socket.id === socket.id){
+Game.prototype.disconnection = function(player){
+    this.players.forEach(function(p){
 
-            GAME.broadcast('p.disconnection', { player_id: this.player_list[i].player_id });
+    });
 
-            this.player_list.splice(i, 1);
+
+
+    for(var i = 0; i < this.players.length; i++){
+        if(this.players[i].socket.id === socket.id){
+
+            GAME.broadcast('p.disconnection', { player_id: this.players[i].player_id });
+
+            this.players.splice(i, 1);
             break;
         }
     }
@@ -251,17 +259,19 @@ Game.prototype.disconnection = function(socket){
  * @param  {Object} data    Data to be sent
  */
 Game.prototype.broadcast = function(type, data){
-    for (var i = this.player_list.length - 1; i >= 0; i--) {
-        this.player_list[i].send(type, data);
+    for (var i = this.players.length - 1; i >= 0; i--) {
+        this.players[i].send(type, data);
     }
 };
+
+// Deprecated (?)
 Game.prototype.sendAllPlayers = function(socket){
     var i;
     var data = {
         players: []
     };
-    for (i = GAME.player_list.length - 1; i >= 0; i--) {
-        data.players.push(GAME.player_list[i].setupJSON());
+    for (i = GAME.players.length - 1; i >= 0; i--) {
+        data.players.push(GAME.players[i].setupJSON());
     }
 
     if(socket)
@@ -273,6 +283,9 @@ Game.prototype.sendAllPlayers = function(socket){
 
 
 
+
+
+// --------------------------------------------------------------
 /** [ LEVEL ]
  * 
  * @param  {String} name    Name for level
@@ -280,6 +293,9 @@ Game.prototype.sendAllPlayers = function(socket){
 function Level(name){
     this.level_name = name;
     this.bases = [];
+
+    // Array where index in array is player number and value is array of start bases
+    this.start_state = [];
 
     this.init();
 }
@@ -290,12 +306,14 @@ Level.prototype.init = function() {
     switch(this.level_name){
         case 'Simple': {
             this.bases = [
-                new Base(0.25, 0.25, 0.05),
-                new Base(0.25, 0.75, 0.05),
-                new Base(0.5,  0.5, 0.05),
-                new Base(0.75, 0.25, 0.05),
-                new Base(0.75, 0.75, 0.05)
+                new Base(0.20, 0.25, 0.07, 10),
+                new Base(0.20, 0.75, 0.07, 10),
+                new Base(0.5,  0.5,  0.10, 20), // MIDDLE
+                new Base(0.80, 0.25, 0.07, 10),
+                new Base(0.80, 0.75, 0.07, 10)
             ];
+            this.start_state[0] = [0];
+            this.start_state[1] = [4];
         } break;
     }
 };
@@ -306,23 +324,32 @@ Level.prototype.init = function() {
 Level.prototype.setupJSON = function() {
     return {
         name: this.level_name,
-        bases: this.bases.map(function(b){ return b.setupJSON(); })
+        bases: this.bases.map(function(b){ return b.setupJSON(); }),
+        start_state: this.start_state
     };
 };
 
 
 
+
+
+
+
+
+
+
+// --------------------------------------------------------------
 /** [ BASE ]
  *
  */
-function Base(left, top, size){
-    this.aspect_left = left;
-    this.aspect_top = top;
-    this.aspect_size = size;
+function Base(left, top, scale, resources){
+    this.left = left;
+    this.top = top;
+    this.scale = scale;
 
     this.id = uniqueID('base');
 
-    this.resources = 0;
+    this.resources = resources || 10;
 }
 /**
  * { SETUP JSON }
@@ -332,9 +359,9 @@ Base.prototype.setupJSON = function() {
     return {
         id: this.id,
         resources: this.resources,
-        aspect_left: this.aspect_left,
-        aspect_top: this.aspect_top,
-        aspect_size: this.aspect_size
+        left: this.left,
+        top: this.top,
+        scale: this.scale
     };
 };
 
@@ -344,6 +371,10 @@ Base.prototype.setupJSON = function() {
 
 
 
+
+
+
+// --------------------------------------------------------------
 /** [ PLAYER ]
  * 
  */
@@ -356,6 +387,13 @@ function Player(client){
 
     this.bindListeners();
 }
+///////////////
+// LISTENERS //
+///////////////
+Player.prototype.diconnect = function() {
+
+};
+///////////////
 /**
  * { BIND LISTENERS}
  * Bind all listeners for game
@@ -395,6 +433,9 @@ Player.prototype.send = function(msg, data) {
 
 
 
+
+
+// --------------------------------------------------------------
 /** UTIL
  * 
  */
@@ -442,6 +483,23 @@ var randomColor = (function(){
 
     return f;
 })();
+var randomName = (function(){
+    var names = [];
+
+    var f = function(){
+        if(names.length === 0){
+            names = [
+                'Gorgeous Greg', 'Splendid Steve', 'Marvelous Marve',
+                'Fantastic Freddy', 'Brilliant Brian', 'Contagious Cedric'
+            ];
+        }
+
+        var index = randomRangeInt(0, names.length);
+        return names.splice(index, 1)[0];
+    };
+
+    return f;
+})();
 var uniqueID = (function(){
     var id = 0;
     var types = {};
@@ -465,6 +523,10 @@ var log = (function(){
 })();
 
 
+
+
+
+// --------------------------------------------------------------
 /** SETUP PROTOTYPES
  * 
  */
@@ -569,6 +631,11 @@ if(!String.prototype.contains){
 
 
 
+
+
+
+
+// --------------------------------------------------------------
 //////////////
 // START IO //
 //////////////

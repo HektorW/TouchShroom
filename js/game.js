@@ -101,6 +101,7 @@ var GAME = {
     last_time: -1, now: -1,
     selected_base: null, hovered_base: null, targeted_base: null,
     bases: [],
+    players: [],
     minions: [],
     particles: [],
     me: null
@@ -111,27 +112,10 @@ var GAME = {
  * General initialization not bound to a game instance
  */
 GAME.init = function(){
-    NET.init();
     SOUND.init();
 
     GAME.canvas = document.querySelector('#canvas');
     GAME.ctx = GAME.canvas.getContext('2d');
-
-    // ADD BASES (singeplay?)
-    // GAME.bases.push(new Base(0.25, 0.5, 0.08));
-    // GAME.bases.push(new Base(0.75, 0.5, 0.08));
-    // GAME.bases.push(new Base(0.5, 0.25, 0.08));
-    // GAME.bases.push(new Base(0.5, 0.75, 0.08));
-
-    // ADD BASES (singeplay?)
-    // var i = 0; var b = new Base(0.25, 0.5, 0.08); b.player_id = i++;
-    // GAME.bases.push(b);
-    // b = new Base(0.75, 0.5, 0.08); b.player_id = i++;
-    // GAME.bases.push(b);
-    // b = new Base(0.5, 0.25, 0.08); b.player_id = i++;
-    // GAME.bases.push(b);
-    // b = new Base(0.5, 0.75, 0.08); b.player_id = i++;
-    // GAME.bases.push(b);
 
 
     // Add method to player list
@@ -200,12 +184,39 @@ GAME.init = function(){
  * @param  {Object} data  Setup data from server (players, level)
  */
 GAME.setup = function(data){
+    var i, b, p;
+
     var lvl = data.level;
     var my_id = data.my_id;
     var players = data.players;
-    out('Level', lvl);
-    out('My id', my_id);
-    out('Players', players);
+
+    timed('Level: ' + lvl.name);
+
+    for(i = 0, len = lvl.bases.length; i < len; i++){
+        b = lvl.bases[i];
+        this.bases.push(
+            new Base(b.id, b.left, b.top, b.scale, b.resources)
+        );
+    }
+    for(i = 0, len = players.length; i < len; i++){
+        p = new Player(
+            players[i].id,
+            players[i].color
+        );
+
+        b = lvl.start_state[i];
+        b.forEach(function(i){
+            this.bases[i].setPlayer(p);
+        }, this);
+
+        if(players[i].id === my_id){
+            GAME.me = p;
+        } else {
+            GAME.players.push(p);
+        }
+    }
+
+    GAME.draw();
 };
 /**
  * { RESIZE }
@@ -306,7 +317,7 @@ GAME.update = function(t){
             SOUND.playRandomSound();
 
             this.particles.push(
-                new Particle(m.target_base.aspect_left, m.target_base.aspect_top, m.target_base.aspect_size, m.source_base.color)
+                new Particle(m.target_base.left, m.target_base.top, m.target_base.scale, m.source_base.color)
                 );
         }
     }
@@ -488,21 +499,25 @@ Minion.prototype.draw = function(ctx) {
 
 /** [ BASE ]
  * Base class for buildings
- * @param {Number} aspect_left  Value (0.0 - 1.0) percentage x
- * @param {Number} aspect_top   Value (0.0 - 1.0) percentage y
- * @param {Number} aspect_size  
- * @param {String} color
+ * @param {Number} id
+ * @param {Number} left     Value (0.0 - 1.0) percentage x
+ * @param {Number} top      Value (0.0 - 1.0) percentage y
+ * @param {Number} scale
+ * @param {Number} resources
  */
-function Base(aspect_left, aspect_top, aspect_size, color){
+function Base(id, left, top, scale, resources){
+    this.id = id;
+
     this.x = -1;
     this.y = -1;
+    this.size = -1;
 
-    this.aspect_left = aspect_left;
-    this.aspect_top = aspect_top;
-    this.aspect_size = aspect_size || 0.1;
+    this.left = left;
+    this.top = top;
+    this.scale = scale || 0.1;
     this.shadow_size = 30;
 
-    this.color = color || '#AAAAAA';
+    this.color = '#AAAAAA';
 
     this.selected = false;
     this.hovered = false;
@@ -511,20 +526,31 @@ function Base(aspect_left, aspect_top, aspect_size, color){
     this.spawn_delay = 0;
     this.spawn_delay_max = 0.5;
 
-    this.animation_timer = 0.0;
+    this.resources = resources || 0;
+
+    this.player = null;
 
     this.resize();
 }
 Base.prototype.resize = function() {
     if(GAME.width > GAME.height) {
-        this.x = GAME.width * this.aspect_left;
-        this.y = GAME.height * this.aspect_top;
-        this.size = GAME.height * this.aspect_size;
+        this.x = GAME.width * this.left;
+        this.y = GAME.height * this.top;
+        this.size = GAME.height * this.scale;
     } else {
-        this.x = GAME.width - (GAME.width * this.aspect_top);
-        this.y = GAME.height * this.aspect_left;
-        this.size = GAME.width * this.aspect_size;
+        this.x = GAME.width - (GAME.width * this.top);
+        this.y = GAME.height * this.left;
+        this.size = GAME.width * this.scale;
     }
+};
+Base.prototype.setPlayer = function(player) {
+    if(this.player){
+        this.player.removeBase(this);
+    }
+
+    this.color = player.color;
+    this.player = player;
+    this.player.addBase(this);
 };
 
 /**
@@ -542,11 +568,6 @@ Base.prototype.update = function(t) {
 Base.prototype.draw = function(ctx) {
     ctx.save();
 
-    // var style =
-    //     (this.selected && 'green') ||
-    //     (this.targeted && 'red') ||
-    //     (this.hovered && 'yellow') ||
-    //      this.color;
     ctx.fillStyle = this.color;
 
     if(this.hovered || this.selected){
@@ -558,12 +579,50 @@ Base.prototype.draw = function(ctx) {
     ctx.arc(this.x, this.y, this.size, Math.PI*2, false);
     ctx.fill();
 
+
+    // Draw text
+    ctx.fillStyle = 'black';
+    var m = ctx.measureText(this.resources);
+    ctx.fillText(this.resources, this.x - m.width/2, this.y);
+
     ctx.restore();
 };
 
 
 
 
+
+
+/** [ PLAYER ]
+ * Player
+ * @param {Number} id
+ * @param {String} color
+ */
+function Player(id, color){
+    this.id = id;
+    this.color = color;
+
+    this.bases_id = [];
+}
+/**
+ * { ADD BASE }
+ * Adds a base to player
+ * @param  {Base} base
+ */
+Player.prototype.addBase = function(base) {
+    if(!this.bases_id.contains(base.id))
+        this.bases_id.push(base.id);
+};
+/**
+ * { REMOVE BASE }
+ * Removes a base from player
+ * @param  {Base} base
+ */
+Player.prototype.removeBase = function(base) {
+    var i = this.bases_id.indexOf(base.id);
+    if(i !== -1)
+        this.bases_id.splice(i, 1);
+};
 
 
 
@@ -573,13 +632,14 @@ Base.prototype.draw = function(ctx) {
 /** [ PARTICLE ]
  * 
  */
-function Particle(aspect_left, aspect_top, aspect_size, color){
+function Particle(left, top, scale, color){
     this.x = -1;
     this.y = -1;
+    this.size = -1;
 
-    this.aspect_left = aspect_left;
-    this.aspect_top = aspect_top;
-    this.aspect_size = aspect_size || 0.01;
+    this.left = left;
+    this.top = top;
+    this.scale = scale || 0.01;
 
     this.color = color || '#AAAAAA';
     this.rgba = hexcolorToRGB(this.color);
@@ -595,13 +655,13 @@ function Particle(aspect_left, aspect_top, aspect_size, color){
  */
 Particle.prototype.resize = function() {
     if(GAME.width > GAME.height) {
-        this.x = GAME.width * this.aspect_left;
-        this.y = GAME.height * this.aspect_top;
-        this.size = GAME.height * this.aspect_size;
+        this.x = GAME.width * this.left;
+        this.y = GAME.height * this.top;
+        this.size = GAME.height * this.scale;
     } else {
-        this.x = GAME.width - (GAME.width * this.aspect_top);
-        this.y = GAME.height * this.aspect_left;
-        this.size = GAME.width * this.aspect_size;
+        this.x = GAME.width - (GAME.width * this.top);
+        this.y = GAME.height * this.left;
+        this.size = GAME.width * this.scale;
     }
 };
 /**

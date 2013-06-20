@@ -1,9 +1,9 @@
 /** TODO
  *
  * { GAME }
- * -    Get information about players in game
- *         Save players in some list
- * -    Get information about game
+ * -    Get information about players in game (DONE)
+ *         Save players in some list (DONE)
+ * -    Get information about game (DONE)
  * -    Bind listeners for game
  *         Save listener to be able to remove
  * -    Count down start -> start game
@@ -232,6 +232,12 @@ if(!Array.prototype.forEach){
         };
     })(this);
 }
+if(!Array.prototype.contains){
+    Array.prototype.contains = function(search, start){
+        start = start || 0;
+        return (this.indexOf(search) >= start);
+    };
+}
 // STRING
 if(!String.prototype.format){
     String.prototype.format = function(){
@@ -242,9 +248,9 @@ if(!String.prototype.format){
     };
 }
 if(!String.prototype.contains){
-    String.prototype.contains = function(needle, start){
+    String.prototype.contains = function(search, start){
         start = start || 0;
-        return (this.indexOf(needle) >= start);
+        return (this.indexOf(search) >= start);
     };
 }
 
@@ -253,7 +259,7 @@ if(!String.prototype.contains){
 /** DEBUG UTIL
  * 
  */
-var out = (function(){
+var DEBUG = (function(){
     var msgs = {};
     var elem;
 

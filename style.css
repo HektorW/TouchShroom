@@ -21,7 +21,7 @@ body{
     top:0;
 }
 
-.centered_msg {
+.centered_absolute {
     z-index: 10;
     font-family: monospace;
     /*display: none;*/
@@ -30,7 +30,7 @@ body{
     left: 50%;
     cursor: default;
 }
-.centered_msg div {
+.centered_absolute div {
     position: relative;
     left: -50%;
 }
