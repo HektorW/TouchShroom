@@ -14,6 +14,10 @@
  *         Create bases
  * -    Start countdown -> start game
  * -    Game logic
+ *
+ * { LEVEL }
+ * -    Level is initialized a bit wierd
+ * 
  */
 
 
@@ -173,10 +177,18 @@ function Game(clients){
         game.players.push(p);
     });
 
+    this.state = 'none';
+
+    this.last_update = -1;
+    this.interval_id = undefined;
+    this.interval = 1000 / 30;
+
+    this.bound_loop = this.loop.bind(this);
+
     ///////////
     // LEVEL //
     ///////////
-    this.level = new Level('Simple');
+    this.level = new Level('Simple', this);
 
     // INIT
     this.init();
@@ -200,6 +212,7 @@ Game.prototype.init = function(){
     // });
 
 
+    this.state = 'setup';
     // Send setup data
     this.players.forEach(function(p){
         // !May be dangerous, but should probably work!
@@ -209,23 +222,52 @@ Game.prototype.init = function(){
     });
 };
 /**
- * { UPDATE }
- * @param  {Number} t   Elapsed time since last update
+ * { START GAME }
+ * Start the game
  */
-Game.prototype.update = function(t){
-};
+Game.prototype.start = function() {
+    this.state = 'started';
+    this.broadcast('GAME.start');
 
+    this.last_update = Date.now();
+    this.loop();
+};
 /**
  * { END }
  * End the game
  */
 Game.prototype.end = function() {
+    clearInterval(this.interval_id);
+
     this.players.forEach(function(p){
         p.destroy();
     });
 
+    this.state = 'ended';
     CONTROLLER.endgame(this);
 };
+/**
+ * { UPDATE }
+ * @param  {Number} t   Elapsed time since last update
+ */
+
+Game.prototype.loop = function() {
+    var now = Date.now();
+    var elapsed = (now - this.last_update) / 1000.0;
+    this.last_update = now;
+
+    this.update(elapsed);
+
+    setTimeout(this.bound_loop, this.interval);
+};
+Game.prototype.update = function(t){
+    var i;
+
+    // Update level
+    this.level.update(t);
+};
+
+
 
 /**
  * { NEW CONNECTION }
@@ -290,6 +332,14 @@ Game.prototype.disconnection = function(player){
     //     }
     // }
 };
+Game.prototype.playerReady = function(player) {
+    var start = this.players.every(function(p){
+        return (p.ready);
+    });
+
+    if(start)
+        this.start();
+};
 /**
  * { BROADCAST }
  * Sends message to all connected clients
@@ -328,8 +378,9 @@ Game.prototype.sendAllPlayers = function(socket){
  * 
  * @param  {String} name    Name for level
  */
-function Level(name){
+function Level(name, game){
     this.level_name = name;
+    this.game = game;
     this.bases = [];
 
     // Array where index in array is player number and value is array of start bases
@@ -344,11 +395,11 @@ Level.prototype.init = function() {
     switch(this.level_name){
         case 'Simple': {
             this.bases = [
-                new Base(0.20, 0.25, 0.07, 10),
-                new Base(0.20, 0.75, 0.07, 10),
-                new Base(0.5,  0.5,  0.10, 20), // MIDDLE
-                new Base(0.80, 0.25, 0.07, 10),
-                new Base(0.80, 0.75, 0.07, 10)
+                new Base(this, 0.20, 0.25, 0.07, 10),
+                new Base(this, 0.20, 0.75, 0.07, 10),
+                new Base(this, 0.5,  0.5,  0.10, 20), // MIDDLE
+                new Base(this, 0.80, 0.25, 0.07, 10),
+                new Base(this, 0.80, 0.75, 0.07, 10)
             ];
             this.start_state[0] = [0];
             this.start_state[1] = [4];
@@ -366,6 +417,17 @@ Level.prototype.setupJSON = function() {
         start_state: this.start_state
     };
 };
+/**
+ * { UPDATE }
+ * @param  {Number} t 
+ */
+Level.prototype.update = function(t) {
+    var i;
+
+    for(i = 0, len = this.bases.length; i < len; i++){
+        this.bases[i].update(t);
+    }
+};
 
 
 
@@ -380,14 +442,22 @@ Level.prototype.setupJSON = function() {
 /** [ BASE ]
  *
  */
-function Base(left, top, scale, resources){
+function Base(level, left, top, scale, resources){
+    this.level = level;
+
     this.left = left;
     this.top = top;
     this.scale = scale;
 
     this.id = uniqueID('base');
 
+    this.player = null;
+
     this.resources = resources || 10;
+    this.resources_max = 60;
+
+    this.resource_increase_delay_max = 2.0;
+    this.resource_increase_delay = this.resource_increase_delay_max;
 }
 /**
  * { SETUP JSON }
@@ -401,6 +471,42 @@ Base.prototype.setupJSON = function() {
         top: this.top,
         scale: this.scale
     };
+};
+/**
+ * { UPDATE }
+ * @param  {Number} t
+ */
+Base.prototype.update = function(t) {
+
+    if(this.player_id !== null){
+        this.resource_increase_delay -= t;
+        if(this.resource_increase_delay <= 0){
+            this.resource_increase_delay = this.resource_increase_delay_max;
+
+            ++this.resources;
+
+            if(this.resources > this.resources_max)
+                this.resources = this.resources_max;
+
+            this.level.game.broadcast('BASE.resources', {
+                base_id: this.id,
+                resources: this.resources
+            });
+        }
+    }
+};
+/**
+ * { SET PLAYER }
+ * Sets which player owns the base
+ * @param  {Player} player
+ */
+Base.prototype.setPlayer = function(player) {
+    if(this.player){
+        this.player.removeBase(this);
+    }
+
+    this.player = player;
+    this.player.addBase(this);
 };
 
 
@@ -421,6 +527,8 @@ function Player(client, game){
     this.socket = client.socket;
 
     this.game = game;
+    this.bases_id = [];
+    this.ready = false;
 
     this.color = randomColor();
     this.id = uniqueID('player');
@@ -451,6 +559,10 @@ Player.prototype.addListeners = function() {
 
     this.listeners['disconnect'] = function(){
         self.disconnect();
+    };
+    this.listeners['PLAYER.ready'] = function(){
+        self.ready = true;
+        self.game.playerReady(this);
     };
 
 
@@ -490,6 +602,26 @@ Player.prototype.setupJSON = function() {
  */
 Player.prototype.send = function(msg, data) {
     this.client.send(msg, data);
+};
+/**
+ * { ADD BASE }
+ * Adds a base to player
+ * @param  {Base} base
+ */
+Player.prototype.addBase = function(base) {
+    var i = this.bases_id.indexOf(base.id);
+    if(i === -1)
+        this.bases_id.push(base.id);
+};
+/**
+ * { REMOVE BASE }
+ * Removes a base from player
+ * @param  {Base} base
+ */
+Player.prototype.removeBase = function(base) {
+    var i = this.bases_id.indexOf(base.id);
+    if(i !== -1)
+        this.bases_id.splice(i, 1);
 };
 
 

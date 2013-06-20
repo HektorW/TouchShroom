@@ -133,10 +133,16 @@ GAME.init = function(){
     // Add method to player list
     GAME.bases.indexByID = function(id){
         for (var i = this.length - 1; i >= 0; i--) {
-            if(this[i].player_id === id)
+            if(this[i].id === id)
                 return i;
         }
         return undefined;
+    };
+    GAME.bases.byID = function(id){
+        for(var i = 0, len = this.length; i < len; i++){
+            if(this[i].id === id)
+                return this[i];
+        }
     };
 
     GAME.resize();
@@ -222,14 +228,16 @@ GAME.setup = function(data){
             this.bases[i].setPlayer(p);
         }, this);
 
+        GAME.players.push(p);
+
         if(players[i].id === my_id){
             GAME.me = p;
-        } else {
-            GAME.players.push(p);
         }
     }
 
-    GAME.draw();
+    NET.send('PLAYER.ready');
+
+    // GAME.draw();
 };
 /**
  * { RESIZE }
@@ -261,19 +269,30 @@ GAME.start = function(){
 GAME.end = function(){
     if(GAME.animationFrame)
         window.cancelAnimationFrame(GAME.animationFrame);
+
+
     // CLEAN UP GAME
-    // 
+    GAME.bases.length = 0;
+    GAME.players.length = 0;
+    GAME.me = null;
+    GAME.minions.length = 0;
+    GAME.particles.length = 0;
 
     // Temporary solution to hide overlay and go back to START
     setTimeout(function(){
         CONTROLLER.overlayHide();
         CONTROLLER.setScreen('start');
-    }, 2000);
+    }, 3000);
 };
 
 ////////////
 // EVENTS //
 ////////////
+/**
+ * { DISCONNECTION }
+ * Called when a player disconnects from the game
+ * @param  {Object} data
+ */
 GAME.disconnection = function(data){
     var p = this.players.findBy('id', data.player_id);
 
@@ -281,7 +300,17 @@ GAME.disconnection = function(data){
         CONTROLLER.overlayMessage("'{0}' disconnected".format(p.name));
     }
 };
+/**
+ * { BASE RESOURCES }
+ * When a base got updated resources from server
+ * @param  {Object} data
+ */
+GAME.baseResources = function(data){
+    var b = GAME.bases.byID(data.base_id);
 
+    if(b)
+        b.resources = data.resources;
+};
 
 
 /**
@@ -315,6 +344,8 @@ GAME.loop = function(time){
 GAME.update = function(t){
     var i, len, b, m, p;
 
+
+    // Check input
     this.hovered_base = null;
     this.targeted_base = null;
     for(i = 0, len = this.bases.length; i < len; i++){
@@ -325,31 +356,44 @@ GAME.update = function(t){
         b.hovered = false;
         b.targeted = false;
 
-        if(!b.selected && pointInCircle(TOUCH.x, TOUCH.y, b.x, b.y, b.size)){
-            if(this.selected_base){
-                b.targeted = true;
-                this.targeted_base = b;
-
-                if(this.selected_base.spawn_delay <= 0.0){
-                    // Send to server
-                    NET.socket.emit('p.minion', {
-                        source_id: this.selected_base.player_id,
-                        target_id: this.targeted_base.player_id
-                    });
-
-                    // this.minions.push(
-                    //     new Minion(this.selected_base, this.targeted_base)
-                    //     );
-
-                    this.selected_base.spawn_delay = this.selected_base.spawn_delay_max;
-                }
-            } else {
+        if(this.me.bases_id.indexOf(b.id) != -1){
+            if(!b.selected && pointInCircle(TOUCH.x, TOUCH.y, b.x, b.y, b.size)){
                 b.hovered = true;
                 this.hovered_base = b;
             }
         }
+
+
+        /////////
+        // OLD //
+        /////////
+        // if(!b.selected && pointInCircle(TOUCH.x, TOUCH.y, b.x, b.y, b.size)){
+        //     if(this.selected_base){
+        //         b.targeted = true;
+        //         this.targeted_base = b;
+
+        //         if(this.selected_base.spawn_delay <= 0.0){
+        //             // Send to server
+        //             NET.socket.emit('p.minion', {
+        //                 source_id: this.selected_base.player_id,
+        //                 target_id: this.targeted_base.player_id
+        //             });
+
+        //             // this.minions.push(
+        //             //     new Minion(this.selected_base, this.targeted_base)
+        //             //     );
+
+        //             this.selected_base.spawn_delay = this.selected_base.spawn_delay_max;
+        //         }
+        //     } else {
+        //         b.hovered = true;
+        //         this.hovered_base = b;
+        //     }
+        // }
     }
 
+
+    // Update minions
     for(i = 0, len = this.minions.length; i < len; i++){
         m = this.minions[i];
         m.update(t);
@@ -365,6 +409,7 @@ GAME.update = function(t){
         }
     }
 
+    // Update paticles
     for(i = 0, len = this.particles.length; i < len; i++){
         p = this.particles[i];
         p.update(t);
@@ -406,10 +451,14 @@ GAME.draw = function(){
             y = TOUCH.y;
         }
 
+        GAME.ctx.save();
+
         var line_size = 5;
         var color = GAME.me.color || '#AAA';
         drawLine(GAME.ctx, b.x, b.y, x, y, color, line_size);
         drawCircle(GAME.ctx, x, y, line_size / 2, color);
+
+        GAME.ctx.restore();
     }
 
     ////////////////
@@ -425,6 +474,58 @@ GAME.draw = function(){
     for(i = 0, len = this.particles.length; i < len; i++){
         this.particles[i].draw(this.ctx);
     }
+
+
+    ////////////////
+    // DRAW SCORE //
+    ////////////////
+    GAME.drawScoreBar();
+};
+/**
+ * { DRAW SCORE }
+ * Draw a score bar
+ * Needs to be tuned for some performance probably
+ *     Only update when score has updated
+ */
+GAME.drawScoreBar = function(){
+    var x, y, w, h, i, r, total, a, xt, wt, text;
+
+    GAME.ctx.save();
+
+    w = GAME.width / 1.5;
+    h = GAME.height / 20;
+    x = (GAME.width / 2) - (w / 2);
+    y = (GAME.height / 20) - (h / 2);
+
+    r = [];
+    total = 0;
+    for(i = 0, len = GAME.players.length; i < len; i++){
+        r[i] = GAME.players[i].totalResources();
+        total += r[i];
+    }
+
+    xt = x;
+    for(i = 0, len = GAME.players.length; i < len; i++){
+        GAME.ctx.fillStyle = GAME.players[i].color;
+        wt = (r[i] / total) * w;
+        GAME.ctx.fillRect(
+            xt,
+            y,
+            wt,
+            h
+        );
+        text = GAME.players[i].name + ' - ' + r[i];
+        GAME.ctx.fillStyle = 'black';
+        GAME.ctx.fillText(text, xt + (wt/2) - (GAME.ctx.measureText(text).width/2), y+(h/2));
+
+        xt += wt;
+    }
+
+
+    GAME.ctx.strokeStyle = 'white';
+    GAME.ctx.strokeRect(x, y, w, h);
+
+    GAME.ctx.restore();
 };
 /**
  * { START TOUCH }
@@ -445,11 +546,25 @@ GAME.startTouch = function(){
     if(!GAME.me)
         return;
 
-    // Test just against [me]
-    if(pointInCircle(TOUCH.x, TOUCH.y, GAME.me.x, GAME.me.y, GAME.me.size)){
-        GAME.me.selected = true;
-        GAME.selected_base = GAME.me;
+    for(i = 0, len = GAME.me.bases_id.length; i < len; i++){
+        b = GAME.bases[GAME.bases.indexByID(GAME.me.bases_id[i])];
+
+        if(pointInCircle(TOUCH.x, TOUCH.y, b.x, b.y, b.size)){
+            b.selected = true;
+            GAME.selected_base = b;
+            break;
+        }
     }
+
+
+    /////////
+    // OLD //
+    /////////
+    // // Test just against [me]
+    // if(pointInCircle(TOUCH.x, TOUCH.y, GAME.me.x, GAME.me.y, GAME.me.size)){
+    //     GAME.me.selected = true;
+    //     GAME.selected_base = GAME.me;
+    // }
 };
 /**
  * { END TOUCH }
@@ -540,6 +655,8 @@ Minion.prototype.draw = function(ctx) {
 
 
 
+
+
 // --------------------------------------------------------------
 /** [ BASE ]
  * Base class for buildings
@@ -587,7 +704,11 @@ Base.prototype.resize = function() {
         this.size = GAME.width * this.scale;
     }
 };
-
+/**
+ * { SET PLAYER }
+ * Sets which player owns the base
+ * @param  {Player} player
+ */
 Base.prototype.setPlayer = function(player) {
     if(this.player){
         this.player.removeBase(this);
@@ -615,9 +736,13 @@ Base.prototype.draw = function(ctx) {
 
     ctx.fillStyle = this.color;
 
-    if(this.hovered || this.selected){
-        ctx.shadowColor = this.color || '#000';
-        ctx.shadowBlur = this.size;
+    if(this.hovered){
+        ctx.shadowColor = this.color;
+        ctx.shadowBlur = 10;
+    }
+    else if(this.selected){
+        ctx.shadowColor = this.color;
+        ctx.shadowBlur = 20;
     }
 
     ctx.beginPath();
@@ -671,7 +796,18 @@ Player.prototype.removeBase = function(base) {
     if(i !== -1)
         this.bases_id.splice(i, 1);
 };
-
+/**
+ * { TOTAL RESOURCES }
+ * Calculates players total resources based on bases
+ */
+Player.prototype.totalResources = function() {
+    var t = 0, index, i;
+    for(i = 0, len = this.bases_id.length; i < len; i++){
+        index = GAME.bases.indexByID(this.bases_id[i]);
+        t += GAME.bases[index].resources;
+     }
+     return t;
+};
 
 
 

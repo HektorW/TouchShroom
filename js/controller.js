@@ -161,6 +161,9 @@ NET.init = function(){
     this.socket.on('GAME.setup', function(data){
         GAME.setup(data);
     });
+    this.socket.on('GAME.start', function(){
+        GAME.start();
+    });
     this.socket.on('GAME.disconnection', function(data){
         GAME.disconnection(data);
     });
@@ -168,6 +171,13 @@ NET.init = function(){
         GAME.end();
     });
 
+
+    //////////
+    // BASE //
+    //////////
+    this.socket.on('BASE.resources', function(data){
+        GAME.baseResources(data);
+    });
 
 
 
