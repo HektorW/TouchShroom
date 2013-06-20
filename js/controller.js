@@ -60,6 +60,22 @@ CONTROLLER.setScreen = function(screen){
     }
 };
 /**
+ * { OVERLAY MESSAGE }
+ * Displays an overlay message
+ * @param  {String} msg
+ */
+CONTROLLER.overlayMessage = function(msg){
+    DOM.removeClass('#overlay', 'hidden');
+    DOM.text('#overlay_message', "<h2>{0}</h2>".format(msg));
+};
+/**
+ * { OVERLAY HIDE }
+ * Hides the overlay
+ */
+CONTROLLER.overlayHide = function(){
+    DOM.addClass('#overlay', 'hidden');
+};
+/**
  * { CONNECTED }
  */
 CONTROLLER.connected = function(){
@@ -126,6 +142,9 @@ NET.init = function(){
     ////////////////
     // CONTROLLER //
     ////////////////
+    this.socket.on('SERVER.yourname', function(data){
+        timed("You shall be known as '{0}'".format(data.name));
+    });
     this.socket.on('SERVER.num_players', function(data){
         timed('Players online: ' + data.num_players);
     });
@@ -142,10 +161,20 @@ NET.init = function(){
     this.socket.on('GAME.setup', function(data){
         GAME.setup(data);
     });
+    this.socket.on('GAME.disconnection', function(data){
+        GAME.disconnection(data);
+    });
+    this.socket.on('GAME.end', function(){
+        GAME.end();
+    });
 
-    //////////
-    // GAME //
-    //////////
+
+
+
+
+    //////////////
+    // GAME OLD //
+    //////////////
     this.socket.on('my player', function(data){
         GAME.me = new Base(data.player.aspect_left, data.player.aspect_top, data.player.aspect_size, data.player.color);
         GAME.me.player_id = data.player.player_id;
@@ -321,6 +350,13 @@ var DOM = (function(){
             elem.classList.remove(cls);
     };
 
+    f.text = function(elem, text){
+        if(typeof(elem) === 'string')
+            elem = document.querySelector(elem);
+        if(elem)
+            elem.innerHTML = text;
+    };
+
     f.on = function(elem, event, callback, capture){
         if(typeof(elem) === 'string')
             elem = document.querySelector(elem);
@@ -342,7 +378,7 @@ var timed = (function(){
         var div = document.createElement('div');
         elem = document.createElement('h2');
 
-        container.classList.add('centered_msg');
+        container.classList.add('centered_absolute');
         container.classList.add('hidden');
         div.appendChild(elem);
         container.appendChild(div);

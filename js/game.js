@@ -1,3 +1,4 @@
+// --------------------------------------------------------------
 /** [ TOUCH ]
  * 
  */
@@ -11,6 +12,8 @@ var TOUCH = {
 };
 
 
+
+// --------------------------------------------------------------
 /** [ SOUND ]
  *
  */
@@ -92,7 +95,7 @@ SOUND.gainNode = function(start, end, time){
 
 
 
-
+// --------------------------------------------------------------
 /** [ GAME ]
  * 
  */
@@ -104,7 +107,8 @@ var GAME = {
     players: [],
     minions: [],
     particles: [],
-    me: null
+    me: null,
+    animationFrame: null
 };
 /**
  * { INIT }
@@ -117,6 +121,14 @@ GAME.init = function(){
     GAME.canvas = document.querySelector('#canvas');
     GAME.ctx = GAME.canvas.getContext('2d');
 
+    // Find element in array by property
+    GAME.players.findBy = function(prop, value){
+        for(var i = 0, len = this.length; i < len; i++){
+            if(this[i][prop] === value)
+                return this[i];
+        }
+        return undefined;
+    };
 
     // Add method to player list
     GAME.bases.indexByID = function(id){
@@ -201,6 +213,7 @@ GAME.setup = function(data){
     for(i = 0, len = players.length; i < len; i++){
         p = new Player(
             players[i].id,
+            players[i].name,
             players[i].color
         );
 
@@ -239,8 +252,38 @@ GAME.resize = function(){
  */
 GAME.start = function(){
     GAME.now = GAME.last_time = window.performance.now();
-    window.requestAnimationFrame(GAME.loop);
+    GAME.animationFrame = window.requestAnimationFrame(GAME.loop);
 };
+/**
+ * { END }
+ * Called when server tells to end game
+ */
+GAME.end = function(){
+    if(GAME.animationFrame)
+        window.cancelAnimationFrame(GAME.animationFrame);
+    // CLEAN UP GAME
+    // 
+
+    // Temporary solution to hide overlay and go back to START
+    setTimeout(function(){
+        CONTROLLER.overlayHide();
+        CONTROLLER.setScreen('start');
+    }, 2000);
+};
+
+////////////
+// EVENTS //
+////////////
+GAME.disconnection = function(data){
+    var p = this.players.findBy('id', data.player_id);
+
+    if(p !== undefined){
+        CONTROLLER.overlayMessage("'{0}' disconnected".format(p.name));
+    }
+};
+
+
+
 /**
  * { LOOP }
  * First entry point for game loop
@@ -263,7 +306,7 @@ GAME.loop = function(time){
     GAME.draw_time = performance.now();
     GAME.draw();
 
-    window.requestAnimationFrame(GAME.loop);
+    GAME.animationFrame = window.requestAnimationFrame(GAME.loop);
 };
 /**
  * { UPDATE }
@@ -428,6 +471,7 @@ GAME.endTouch = function(){
 
 
 
+// --------------------------------------------------------------
 /** [ MINION ]
  * Base class for all minions
  * @param {Base}    source
@@ -496,7 +540,7 @@ Minion.prototype.draw = function(ctx) {
 
 
 
-
+// --------------------------------------------------------------
 /** [ BASE ]
  * Base class for buildings
  * @param {Number} id
@@ -543,6 +587,7 @@ Base.prototype.resize = function() {
         this.size = GAME.width * this.scale;
     }
 };
+
 Base.prototype.setPlayer = function(player) {
     if(this.player){
         this.player.removeBase(this);
@@ -593,13 +638,16 @@ Base.prototype.draw = function(ctx) {
 
 
 
+
+// --------------------------------------------------------------
 /** [ PLAYER ]
  * Player
  * @param {Number} id
  * @param {String} color
  */
-function Player(id, color){
+function Player(id, name, color){
     this.id = id;
+    this.name = name;
     this.color = color;
 
     this.bases_id = [];
@@ -629,6 +677,8 @@ Player.prototype.removeBase = function(base) {
 
 
 
+
+// --------------------------------------------------------------
 /** [ PARTICLE ]
  * 
  */
@@ -696,6 +746,8 @@ Particle.prototype.draw = function(ctx) {
 
 
 
+
+// --------------------------------------------------------------
 /** DRAW UTIL
  * 
  */
@@ -721,6 +773,11 @@ function drawCircle(ctx, x, y, r, color, style){
 }
 
 
+
+
+
+
+// --------------------------------------------------------------
 /** UTIL
  * 
  */
@@ -780,6 +837,10 @@ function hexcolorToRGB(hex){
 
 
 
+
+
+
+// --------------------------------------------------------------
 /** MATH
  * 
  */
@@ -794,6 +855,10 @@ function pointInCircle(px, py, cx, cy, cr){
 }
 
 
+
+
+
+// --------------------------------------------------------------
 /** SETUP PRE-FIXES
  * 
  */
@@ -813,6 +878,14 @@ window.requestAnimationFrame =
             setTimeout(function(){
                 callback(window.performance.now());
             }, 1000/60);
+        };
+window.cancelAnimationFrame =
+        window.cancelAnimationFrame ||
+        /*window.webkitCancelAnimationFrame ||*/ // Ipad is wierd
+        window.mozCancelAnimationFrame ||
+        window.msCancelAnimationFrame ||
+        function(id){
+            clearTimeout(id);
         };
 window.AudioContext =
         window.AudioContext ||

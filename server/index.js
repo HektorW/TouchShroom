@@ -49,8 +49,8 @@ CONTROLLER.connection = function(socket){
         CONTROLLER.clientPlayRequest(client);
     });
 
-
-    socket.emit('SERVER.num_players', {num_players: CONTROLLER.clients.length});
+    socket.emit('SERVER.yourname', { name: client.name });
+    socket.emit('SERVER.num_players', { num_players: CONTROLLER.clients.length });
 };
 /**
  * { REMOVE }
@@ -92,6 +92,26 @@ CONTROLLER.startgame = function(clients){
     var g = new Game(clients);
     CONTROLLER.games.push(g);
 };
+/**
+ * { END GAME }
+ * Ends a game, removes it from list and sets state for clients
+ * @param  {Game} game
+ */
+CONTROLLER.endgame = function(game){
+    // Send to clients, end game
+    game.players.forEach(function(p){
+        p.send('GAME.end', {});
+        p.client.status = 'none';
+        p.client.game_id = -1;
+    });
+
+
+    // Remove game from list
+    var index = CONTROLLER.games.indexOf(game);
+    if(index != -1){
+        CONTROLLER.games.splice(index, 1);
+    }
+};
 
 
 
@@ -110,6 +130,8 @@ function Client(socket){
 
     this.id = uniqueID('client');
     this.status = 'none';
+
+    this.name = randomName();
 
     this.game_id = -1;
 }
@@ -147,7 +169,7 @@ function Game(clients){
         c.game_id = game.id;
         c.send('SERVER.initgame');
 
-        var p = new Player(c);
+        var p = new Player(c, game);
         game.players.push(p);
     });
 
@@ -194,6 +216,18 @@ Game.prototype.update = function(t){
 };
 
 /**
+ * { END }
+ * End the game
+ */
+Game.prototype.end = function() {
+    this.players.forEach(function(p){
+        p.destroy();
+    });
+
+    CONTROLLER.endgame(this);
+};
+
+/**
  * { NEW CONNECTION }
  * @param  {Socket} socket  Connected socket
  */
@@ -237,20 +271,24 @@ Game.prototype.connection = function(socket){
  */
 Game.prototype.disconnection = function(player){
     this.players.forEach(function(p){
-
+        if(p.id !== player.id){
+            p.send('GAME.disconnection', {
+                player_id: player.id
+            });
+        }
     });
 
+    this.end();
 
+    // for(var i = 0; i < this.players.length; i++){
+    //     if(this.players[i].socket.id === socket.id){
 
-    for(var i = 0; i < this.players.length; i++){
-        if(this.players[i].socket.id === socket.id){
+    //         GAME.broadcast('p.disconnection', { player_id: this.players[i].player_id });
 
-            GAME.broadcast('p.disconnection', { player_id: this.players[i].player_id });
-
-            this.players.splice(i, 1);
-            break;
-        }
-    }
+    //         this.players.splice(i, 1);
+    //         break;
+    //     }
+    // }
 };
 /**
  * { BROADCAST }
@@ -378,32 +416,60 @@ Base.prototype.setupJSON = function() {
 /** [ PLAYER ]
  * 
  */
-function Player(client){
+function Player(client, game){
     this.client = client;
     this.socket = client.socket;
+
+    this.game = game;
 
     this.color = randomColor();
     this.id = uniqueID('player');
 
-    this.bindListeners();
+    this.listeners = {};
+
+    this.addListeners();
 }
+Player.prototype.destroy = function() {
+    this.removeListeners();
+};
 ///////////////
 // LISTENERS //
 ///////////////
-Player.prototype.diconnect = function() {
-
+Player.prototype.disconnect = function() {
+    this.game.disconnection(this);
 };
 ///////////////
 /**
  * { BIND LISTENERS}
  * Bind all listeners for game
  */
-Player.prototype.bindListeners = function() {
+Player.prototype.addListeners = function() {
     ///////////////
     // LISTENERS //
     ///////////////
-    // Disconnect
+    var self = this;
+
+    this.listeners['disconnect'] = function(){
+        self.disconnect();
+    };
+
+
+    // Bind all listeners
+    for(var l in this.listeners){
+        this.client.socket.on(l, this.listeners[l]);
+    }
+
+
+    // this.client.socket.on('disconnect', this.listeners['disconnect']);
+
     // Send minion [source, target]
+};
+Player.prototype.removeListeners = function() {
+    for(var l in this.listeners){
+        this.client.socket.removeListener(l, this.listeners[l]);
+    }
+
+    // this.client.socket.removeListener('disconnect', this.disconnect);
 };
 /**
  * { SETUP JSON }
@@ -411,8 +477,9 @@ Player.prototype.bindListeners = function() {
  */
 Player.prototype.setupJSON = function() {
     return {
-        player_id: this.id,
-        color: this.color
+        id: this.id,
+        color: this.color,
+        name: this.client.name
     };
 };
 /**
@@ -490,7 +557,8 @@ var randomName = (function(){
         if(names.length === 0){
             names = [
                 'Gorgeous Greg', 'Splendid Steve', 'Marvelous Marve',
-                'Fantastic Freddy', 'Brilliant Brian', 'Contagious Cedric'
+                'Fantastic Freddy', 'Brilliant Brian', 'Contagious Cedric',
+                'Pragmatic Phil'
             ];
         }
 
@@ -514,9 +582,12 @@ var uniqueID = (function(){
     };
 })();
 
-var log = (function(){
+var LOG = (function(){
     var f = function(){
-        console.log(arguments);
+        for(var i = 0, len = arguments.length; i < len; i++){
+            console.log(arguments[i]);
+        }
+        // console.log(arguments);
     };
 
     return f;
