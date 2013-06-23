@@ -14,15 +14,25 @@
  *         Create bases
  * -    Start countdown -> start game
  * -    Game logic
- *
- * { LEVEL }
- * -    Level is initialized a bit wierd
  * 
  */
 
 
-var io = require('socket.io').listen(8888);
-io.set('log level', 1);
+
+
+/** COMMENT (23/6)
+ *      Setup lvl on game instead
+ *      Fixed bug with bases not getting correct start_state
+ *      Fixed bug with scorebar
+ */
+
+/**
+ * Hann inte skriva klart logik för att skicka grejer
+ */
+
+
+
+
 
 // --------------------------------------------------------------
 /** [ CONTROLLER ]
@@ -177,40 +187,52 @@ function Game(clients){
         game.players.push(p);
     });
 
+    // STATE
     this.state = 'none';
 
+    // Update vars
     this.last_update = -1;
     this.interval_id = undefined;
     this.interval = 1000 / 30;
 
+    // Needed for callback in loop
     this.bound_loop = this.loop.bind(this);
+
+
+    // MINIONS
+    this.minions = [];
 
     ///////////
     // LEVEL //
     ///////////
-    this.level = new Level('Simple', this);
+    this.bases = [];
+    this.bases.byID = function(id){
+        for(var i = 0, len = this.length; i < len; i++){
+            if(this[i].id === id)
+                return this[i];
+        }
+    };
+    this.start_state = [];
+    this.level_name = undefined;
+    InitLevel(this, 'Simple');
 
     // INIT
-    this.init();
+    this.setup();
 }
 /**
- * { INIT }
+ * { SETUP }
  */
-Game.prototype.init = function(){
-
+Game.prototype.setup = function(){
 
     // Object for all setup data
     var setup_data = {
         my_id: -1,
         players: this.players.map(function(p){ return p.setupJSON(); }),
-        level: this.level.setupJSON()
+        bases: this.bases.map(function(b){ return b.setupJSON(); }),
+        start_state: this.start_state,
+        level_name: this.level_name
+        /*level: this.level.setupJSON()*/
     };
-
-    // Add player info to setup_data
-    // this.players.forEach(function(p){
-    //     setup_data.players.push(p.setupJSON());
-    // });
-
 
     this.state = 'setup';
     // Send setup data
@@ -263,8 +285,19 @@ Game.prototype.loop = function() {
 Game.prototype.update = function(t){
     var i;
 
-    // Update level
-    this.level.update(t);
+    // Update bases
+    for(i = 0, len = this.bases.length; i < len; i++){
+        this.bases[i].update(t);
+    }
+
+    for(i = 0, len = this.minions.length; i < len; i++){
+        this.minions[i].update(t);
+
+        if(!this.minions[i].active){
+            this.minions.splice(i--, 1);
+            --len;
+        }
+    }
 };
 
 
@@ -352,21 +385,20 @@ Game.prototype.broadcast = function(type, data){
     }
 };
 
-// Deprecated (?)
-Game.prototype.sendAllPlayers = function(socket){
-    var i;
-    var data = {
-        players: []
-    };
-    for (i = GAME.players.length - 1; i >= 0; i--) {
-        data.players.push(GAME.players[i].setupJSON());
-    }
+Game.prototype.trySendMinion = function(source_id, target_id) {
+    var source = this.bases.byID(source_id);
+    var target = this.bases.byID(target_id);
 
-    if(socket)
-        socket.emit('g.players', data);
-    else
-        GAME.broadcast('g.players', data);
+    if(source.trySendMinion()){
+        var m = new Minion(source, target, 0.001);
+
+        this.minions.add(m);
+        // this.broadcast('');
+    }
 };
+
+
+
 
 
 
@@ -375,62 +407,41 @@ Game.prototype.sendAllPlayers = function(socket){
 
 // --------------------------------------------------------------
 /** [ LEVEL ]
- * 
- * @param  {String} name    Name for level
+ * Initialize a level
+ * @param {Game} game 
+ * @param {String} name     Name of the level
  */
-function Level(name, game){
-    this.level_name = name;
-    this.game = game;
-    this.bases = [];
+function InitLevel(game, name){
+    game.level_name = name;
+    game.bases.length = 0;
+    game.start_state.length = 0;
 
-    // Array where index in array is player number and value is array of start bases
-    this.start_state = [];
-
-    this.init();
-}
-/**
- * { INIT }
- */
-Level.prototype.init = function() {
-    switch(this.level_name){
+    switch(name){
         case 'Simple': {
-            this.bases = [
-                new Base(this, 0.20, 0.25, 0.07, 10),
-                new Base(this, 0.20, 0.75, 0.07, 10),
-                new Base(this, 0.5,  0.5,  0.10, 20), // MIDDLE
-                new Base(this, 0.80, 0.25, 0.07, 10),
-                new Base(this, 0.80, 0.75, 0.07, 10)
-            ];
-            this.start_state[0] = [0];
-            this.start_state[1] = [4];
+
+            game.bases[0] = new Base(game, 0.20, 0.25, 0.07, 10);
+            game.bases[1] = new Base(game, 0.20, 0.75, 0.07, 10);
+            game.bases[2] = new Base(game, 0.5,  0.5,  0.10, 20); // MIDDLE
+            game.bases[3] = new Base(game, 0.80, 0.25, 0.07, 10);
+            game.bases[4] = new Base(game, 0.80, 0.75, 0.07, 10);
+
+            game.start_state[0] = [0];
+            game.start_state[1] = [4];
         } break;
     }
-};
-/**
- * { SETUP JSON }
- * Get information that is shared across network
- */
-Level.prototype.setupJSON = function() {
-    return {
-        name: this.level_name,
-        bases: this.bases.map(function(b){ return b.setupJSON(); }),
-        start_state: this.start_state
-    };
-};
-/**
- * { UPDATE }
- * @param  {Number} t 
- */
-Level.prototype.update = function(t) {
-    var i;
 
-    for(i = 0, len = this.bases.length; i < len; i++){
-        this.bases[i].update(t);
+    var i, j, len, lenj;
+
+    // Set owners according to start state
+    for(i = 0, len = game.start_state.length; i < len; i++){
+        var p = game.players[i];
+        for(j = 0, lenj = game.start_state[i].length; j < lenj; j++){
+            var index = game.start_state[i][j];
+            game.bases[index].setPlayer(p);
+
+        }
     }
-};
-
-
-
+}
 
 
 
@@ -442,8 +453,8 @@ Level.prototype.update = function(t) {
 /** [ BASE ]
  *
  */
-function Base(level, left, top, scale, resources){
-    this.level = level;
+function Base(game, left, top, scale, resources){
+    this.game = game;
 
     this.left = left;
     this.top = top;
@@ -455,6 +466,9 @@ function Base(level, left, top, scale, resources){
 
     this.resources = resources || 10;
     this.resources_max = 60;
+
+    this.spawn_delay = 0;
+    this.spawn_delay_max = 0.5;
 
     this.resource_increase_delay_max = 2.0;
     this.resource_increase_delay = this.resource_increase_delay_max;
@@ -469,7 +483,8 @@ Base.prototype.setupJSON = function() {
         resources: this.resources,
         left: this.left,
         top: this.top,
-        scale: this.scale
+        scale: this.scale,
+        spawn_delay: this.spawn_delay_max
     };
 };
 /**
@@ -478,7 +493,7 @@ Base.prototype.setupJSON = function() {
  */
 Base.prototype.update = function(t) {
 
-    if(this.player_id !== null){
+    if(this.player){
         this.resource_increase_delay -= t;
         if(this.resource_increase_delay <= 0){
             this.resource_increase_delay = this.resource_increase_delay_max;
@@ -488,7 +503,7 @@ Base.prototype.update = function(t) {
             if(this.resources > this.resources_max)
                 this.resources = this.resources_max;
 
-            this.level.game.broadcast('BASE.resources', {
+            this.game.broadcast('BASE.resources', {
                 base_id: this.id,
                 resources: this.resources
             });
@@ -508,8 +523,79 @@ Base.prototype.setPlayer = function(player) {
     this.player = player;
     this.player.addBase(this);
 };
+/**
+ * { TRY SEND MINION }
+ * Tests if the base can send a minion
+ * Returns the result and sets new delay if able
+ */
+Base.prototype.trySendMinion = function() {
+    if(this.spawn_delay <= 0.0){
+        this.spawn_delay = this.spawn_delay_max;
+        --this.resources;
+        return true;
+    }
+    return false;
+};
 
 
+
+
+
+
+
+// --------------------------------------------------------------
+/** [ MINION ]
+ * Base class for all minions
+ * @param {Base}    source
+ * @param {Base}    target
+ * @param {Number}  size
+ * @param {String}  color
+ */
+function Minion(source, target, size){
+    this.source_base = source;
+    this.target_base = target;
+
+    this.left = this.source_base.left;
+    this.top = this.source_base.top;
+    this.size = size || 0.001;
+    this.color = this.source_base.color;
+
+    this.active = true;
+
+    this.start_time = Date.now();
+    this.active_time = 0;
+
+    this.speed = 3;
+
+    this.resize();
+}
+/** 
+ * { RESIZE }
+ */
+Minion.prototype.resize = function() {
+    var delta_speed = 1 / this.speed;
+
+    var distance = vecDistance(this.source_base.left, this.source_base.top, this.target_base.left, this.target_base.top);
+    var distance_left = this.target_base.left - this.source_base.left;
+    var distance_top = this.target_base.top - this.source_base.top;
+
+    this.vel_left = (distance_left / Math.abs((distance / delta_speed))) || 0;
+    this.vel_top = (distance_top / Math.abs((distance / delta_speed))) || 0;
+};
+/** 
+ * { UPDATE }
+ * @param  {Number} t   Elapsed time since last update
+ */
+Minion.prototype.update = function(t) {
+    this.active_time += t;
+
+    this.left = this.source_base.left + this.vel_left * this.active_time;
+    this.top = this.source_base.top + this.vel_top * this.active_time;
+
+    if(pointInCircle(this.left, this.top, this.target_base.left, this.target_base.top, this.target_base.size)){
+        this.active = false;
+    }
+};
 
 
 
@@ -563,6 +649,13 @@ Player.prototype.addListeners = function() {
     this.listeners['PLAYER.ready'] = function(){
         self.ready = true;
         self.game.playerReady(this);
+    };
+    // Action :)
+    this.listeners['BASE.minion'] = function(data){
+        self.game.trySendMinion(
+            data.source_id,
+            data.target_id
+        );
     };
 
 
@@ -627,6 +720,22 @@ Player.prototype.removeBase = function(base) {
 
 
 
+
+
+
+// --------------------------------------------------------------
+/** MATH
+ * 
+ */
+function vecDistanceSq(x1, y1, x2, y2){
+    return Math.pow(x1-x2, 2) + Math.pow(y1-y2, 2);
+}
+function vecDistance(x1, y1, x2, y2){
+    return Math.sqrt(vecDistanceSq(x1, y1, x2, y2));
+}
+function pointInCircle(px, py, cx, cy, cr){
+    return (vecDistanceSq(px, py, cx, cy) < Math.pow(cr, 2));
+}
 
 
 
@@ -842,4 +951,6 @@ if(!String.prototype.contains){
 //////////////
 // START IO //
 //////////////
+var io = require('socket.io').listen(8888);
+io.set('log level', 1);
 io.sockets.on('connection', CONTROLLER.connection);

@@ -10,7 +10,6 @@
  * -    Game logic
  */
 
-
 var CONTROLLER = {
     current_screen: null
 };

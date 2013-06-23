@@ -202,16 +202,16 @@ GAME.init = function(){
  * @param  {Object} data  Setup data from server (players, level)
  */
 GAME.setup = function(data){
-    var i, b, p;
+    var i, b, p, len;
 
-    var lvl = data.level;
+    var lvl_name = data.level_name;
     var my_id = data.my_id;
     var players = data.players;
 
-    timed('Level: ' + lvl.name);
+    timed('Level: ' + lvl_name);
 
-    for(i = 0, len = lvl.bases.length; i < len; i++){
-        b = lvl.bases[i];
+    for(i = 0, len = data.bases.length; i < len; i++){
+        b = data.bases[i];
         this.bases.push(
             new Base(b.id, b.left, b.top, b.scale, b.resources)
         );
@@ -223,8 +223,8 @@ GAME.setup = function(data){
             players[i].color
         );
 
-        b = lvl.start_state[i];
-        b.forEach(function(i){
+        b = data.start_state[i];
+        b.forEach(function(i){ // Know that this will push closer to GC (garbage collector)
             this.bases[i].setPlayer(p);
         }, this);
 
@@ -235,7 +235,7 @@ GAME.setup = function(data){
         }
     }
 
-    NET.send('PLAYER.ready');
+    GAME.send('PLAYER.ready');
 
     // GAME.draw();
 };
@@ -345,16 +345,41 @@ GAME.update = function(t){
     var i, len, b, m, p;
 
 
-    // Check input
+    // Reset hovered and targeted
     this.hovered_base = null;
     this.targeted_base = null;
+
+
+
     for(i = 0, len = this.bases.length; i < len; i++){
         b = this.bases[i];
 
+        // Update base
         b.update(t);
 
+        // Reset base hovered & targeted state
         b.hovered = false;
         b.targeted = false;
+
+
+        /////////////////
+        // CHECK INPUT //
+        /////////////////
+        // Mouse is over base
+        if(pointInCircle(TOUCH.x, TOUCH.y, b.x, b.y, b.size)){
+            // See if there is any selected base and it isn't the one tested
+            if(this.selected_base && this.selected_base !== b){
+                // Set the base as targeted and try to send
+                GAME.trySendMinion(b);
+            }
+            else {
+                // Check if base belons to 'me'
+                if(this.me.bases_id.indexOf(b.id) !== -1){
+                    // Set the base as hovered
+                    b.hovered = true;
+                }
+            }
+        }
 
         if(this.me.bases_id.indexOf(b.id) != -1){
             if(!b.selected && pointInCircle(TOUCH.x, TOUCH.y, b.x, b.y, b.size)){
@@ -391,6 +416,7 @@ GAME.update = function(t){
         //     }
         // }
     }
+
 
 
     // Update minions
@@ -481,6 +507,9 @@ GAME.draw = function(){
     ////////////////
     GAME.drawScoreBar();
 };
+GAME.send = function(msg, data){
+    NET.send(msg, data);
+};
 /**
  * { DRAW SCORE }
  * Draw a score bar
@@ -488,7 +517,7 @@ GAME.draw = function(){
  *     Only update when score has updated
  */
 GAME.drawScoreBar = function(){
-    var x, y, w, h, i, r, total, a, xt, wt, text;
+    var x, y, w, h, i, len, r, total, a, xt, wt, text;
 
     GAME.ctx.save();
 
@@ -531,7 +560,7 @@ GAME.drawScoreBar = function(){
  * { START TOUCH }
  */
 GAME.startTouch = function(){
-    var i, b;
+    var i, b, len;
 
     // Test collision against all
     // for(i = 0; i < this.bases.length; i++){
@@ -579,7 +608,22 @@ GAME.endTouch = function(){
         GAME.selected_base = null;
     }
 };
+/**
+ * { SEND MINION }
+ * Tries to send a minion
+ */
+GAME.trySendMinion = function(target){
+    target.targeted = true;
+    this.targeted_base = target;
 
+    // Call 'canSendMinion' on selected_base
+    if(GAME.selected_base.canSendMinion()){
+        GAME.send('BASE.minion', {
+            source_id: this.selected_base,
+            target_id: target
+        });
+    }
+};
 
 
 
@@ -718,6 +762,22 @@ Base.prototype.setPlayer = function(player) {
     this.player = player;
     this.player.addBase(this);
 };
+/**
+ * { CAN SEND MINION }
+ * Tests if the base can send a minion
+ */
+Base.prototype.trySendMinion = function() {
+    return (this.spawn_delay <= 0.0);
+
+    // if(this.spawn_delay <= 0.0){
+    //     this.spawn_delay = this.spawn_delay_max;
+    //     return true;
+    // }
+    // return false;
+};
+Base.prototype.sendMinion = function() {
+    this.spawn_delay = this.spawn_delay_max;
+};
 
 /**
  * { UPDATE }
@@ -801,7 +861,7 @@ Player.prototype.removeBase = function(base) {
  * Calculates players total resources based on bases
  */
 Player.prototype.totalResources = function() {
-    var t = 0, index, i;
+    var t = 0, index, i, len;
     for(i = 0, len = this.bases_id.length; i < len; i++){
         index = GAME.bases.indexByID(this.bases_id[i]);
         t += GAME.bases[index].resources;
