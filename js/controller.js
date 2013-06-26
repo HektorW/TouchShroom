@@ -171,6 +171,17 @@ NET.init = function(){
     });
 
 
+    ////////////
+    // MINION //
+    ////////////
+    this.socket.on('GAME.minion', function(data){
+        GAME.newMinion(data);
+    });
+    this.socket.on('MINION.hit', function(data){
+        GAME.minionHit(data);
+    });
+
+
     //////////
     // BASE //
     //////////

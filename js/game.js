@@ -1,3 +1,11 @@
+/** TODO
+ * -    [Bug] Base sometimes doesn't change owner on client but seems to on server.
+ *         Base receivs new resources instead of diminishing when sent by client but
+ *         client can't controll it and it isn't colored correctly
+ */
+
+
+
 // --------------------------------------------------------------
 /** [ TOUCH ]
  * 
@@ -129,8 +137,14 @@ GAME.init = function(){
         }
         return undefined;
     };
+    GAME.players.byID = function(id){
+        for(var i = 0, len = this.length; i < len; i++){
+            if(this[i].id === id)
+                return this[i];
+        }
+    };
 
-    // Add method to player list
+    // Add method to base list
     GAME.bases.indexByID = function(id){
         for (var i = this.length - 1; i >= 0; i--) {
             if(this[i].id === id)
@@ -139,6 +153,14 @@ GAME.init = function(){
         return undefined;
     };
     GAME.bases.byID = function(id){
+        for(var i = 0, len = this.length; i < len; i++){
+            if(this[i].id === id)
+                return this[i];
+        }
+    };
+
+    // MINION
+    GAME.minions.byID = function(id){
         for(var i = 0, len = this.length; i < len; i++){
             if(this[i].id === id)
                 return this[i];
@@ -213,7 +235,7 @@ GAME.setup = function(data){
     for(i = 0, len = data.bases.length; i < len; i++){
         b = data.bases[i];
         this.bases.push(
-            new Base(b.id, b.left, b.top, b.scale, b.resources)
+            new Base(b.id, b.left, b.top, b.scale, b.resources, b.resources_max)
         );
     }
     for(i = 0, len = players.length; i < len; i++){
@@ -310,6 +332,58 @@ GAME.baseResources = function(data){
 
     if(b)
         b.resources = data.resources;
+};
+/**
+ * { NEW MINION }
+ * Called when server sends a new minion
+ * @param  {Object} data
+ */
+GAME.newMinion = function(data){
+    var m = data.minion;
+
+    var source = this.bases.byID(m.source_id);
+    var target = this.bases.byID(m.target_id);
+
+    var minion = new Minion(
+        m.id,
+        source,
+        target,
+        m.scale
+    );
+
+    source.sendMinion();
+
+    this.minions.push(minion);
+};
+/**
+ * { MINION HIT }
+ * Called by server when minion reaches target base
+ * @param  {Object} data
+ */
+GAME.minionHit = function(data){
+    var minion_id = data.minion_id;
+    var new_player_id = data.new_player_id;
+    var resources = data.resources;
+
+    // Fetch minion
+    var minion = this.minions.byID(minion_id);
+
+    if(!minion){
+        alert('Minion gone');
+        return;
+    }
+
+    minion.dead_by_server = true;
+
+    // Get target base
+    var target = minion.target_base;
+    // Set resources for base
+    target.resources = resources;
+
+    if(new_player_id !== undefined){
+        var player = this.players.byID(new_player_id);
+        target.setPlayer(player);
+    }
 };
 
 
@@ -422,16 +496,20 @@ GAME.update = function(t){
     // Update minions
     for(i = 0, len = this.minions.length; i < len; i++){
         m = this.minions[i];
-        m.update(t);
+        if(m.active){
+            m.update(t);
 
-        if(!m.active){
+            if(!m.active){
+                SOUND.playRandomSound();
+
+                this.particles.push(
+                    new Particle(m.target_base.left, m.target_base.top, m.target_base.scale, m.source_base.color)
+                    );
+            }
+        }
+        if(m.dead_by_server && !m.active){
             this.minions.splice(i--, 1);
             --len;
-            SOUND.playRandomSound();
-
-            this.particles.push(
-                new Particle(m.target_base.left, m.target_base.top, m.target_base.scale, m.source_base.color)
-                );
         }
     }
 
@@ -460,7 +538,8 @@ GAME.draw = function(){
     //////////////////
     for(i = 0, len = this.minions.length; i < len; i++){
         m = this.minions[i];
-        m.draw(this.ctx);
+        if(m.active)
+            m.draw(this.ctx);
     }
 
     ///////////////
@@ -479,8 +558,9 @@ GAME.draw = function(){
 
         GAME.ctx.save();
 
+        GAME.ctx.globalAlpha = 0.3;
         var line_size = 5;
-        var color = GAME.me.color || '#AAA';
+        var color = GAME.me.color || '#AAA' ;
         drawLine(GAME.ctx, b.x, b.y, x, y, color, line_size);
         drawCircle(GAME.ctx, x, y, line_size / 2, color);
 
@@ -617,10 +697,11 @@ GAME.trySendMinion = function(target){
     this.targeted_base = target;
 
     // Call 'canSendMinion' on selected_base
-    if(GAME.selected_base.canSendMinion()){
+    // [CHANGED] Allways ask server to send
+    if(GAME.selected_base.canSendMinion() || true){
         GAME.send('BASE.minion', {
-            source_id: this.selected_base,
-            target_id: target
+            source_id: this.selected_base.id,
+            target_id: target.id
         });
     }
 };
@@ -635,19 +716,23 @@ GAME.trySendMinion = function(target){
  * Base class for all minions
  * @param {Base}    source
  * @param {Base}    target
- * @param {Number}  size
+ * @param {Number}  scale
  * @param {String}  color
  */
-function Minion(source, target, size){
+function Minion(id, source, target, scale){
+    this.id = id;
+
     this.source_base = source;
     this.target_base = target;
 
     this.x = this.source_base.x;
     this.y = this.source_base.y;
-    this.size = size || 10;
+    this.scale = scale || 0.01;
+    this.size = 10;
     this.color = this.source_base.color;
 
     this.active = true;
+    this.dead_by_server = false;
 
     this.start_time = window.performance.now();
     this.active_time = 0;
@@ -668,6 +753,8 @@ Minion.prototype.resize = function() {
 
     this.vel_x = (distance_x / Math.abs((distance / delta_speed))) || 0;
     this.vel_y = (distance_y / Math.abs((distance / delta_speed))) || 0;
+
+    this.size = ((GAME.width > GAME.height)? GAME.height : GAME.width) * this.scale;
 };
 /** 
  * { UPDATE }
@@ -710,7 +797,7 @@ Minion.prototype.draw = function(ctx) {
  * @param {Number} scale
  * @param {Number} resources
  */
-function Base(id, left, top, scale, resources){
+function Base(id, left, top, scale, resources, resources_max){
     this.id = id;
 
     this.x = -1;
@@ -732,6 +819,7 @@ function Base(id, left, top, scale, resources){
     this.spawn_delay_max = 0.5;
 
     this.resources = resources || 0;
+    this.resources_max = resources_max;
 
     this.player = null;
 
@@ -766,7 +854,7 @@ Base.prototype.setPlayer = function(player) {
  * { CAN SEND MINION }
  * Tests if the base can send a minion
  */
-Base.prototype.trySendMinion = function() {
+Base.prototype.canSendMinion = function() {
     return (this.spawn_delay <= 0.0);
 
     // if(this.spawn_delay <= 0.0){
@@ -777,6 +865,7 @@ Base.prototype.trySendMinion = function() {
 };
 Base.prototype.sendMinion = function() {
     this.spawn_delay = this.spawn_delay_max;
+    --this.resources;
 };
 
 /**
@@ -812,8 +901,9 @@ Base.prototype.draw = function(ctx) {
 
     // Draw text
     ctx.fillStyle = 'black';
-    var m = ctx.measureText(this.resources);
-    ctx.fillText(this.resources, this.x - m.width/2, this.y);
+    var text = this.resources + ((this.player)? '/' + this.resources_max : '');
+    var m = ctx.measureText(text);
+    ctx.fillText(text, this.x - m.width/2, this.y);
 
     ctx.restore();
 };

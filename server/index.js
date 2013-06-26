@@ -177,6 +177,12 @@ function Game(clients){
     // PLAYERS //
     /////////////
     this.players = [];
+    this.players.byID = function(id){
+        for(var i = 0, len = this.length; i < len; i++){
+            if(this[i].id === id)
+                return this[i];
+        }
+    };
     var game = this;
     clients.forEach(function(c){
         c.status = 'ingame';
@@ -283,7 +289,7 @@ Game.prototype.loop = function() {
     setTimeout(this.bound_loop, this.interval);
 };
 Game.prototype.update = function(t){
-    var i;
+    var i, m, len;
 
     // Update bases
     for(i = 0, len = this.bases.length; i < len; i++){
@@ -291,9 +297,16 @@ Game.prototype.update = function(t){
     }
 
     for(i = 0, len = this.minions.length; i < len; i++){
-        this.minions[i].update(t);
+        m = this.minions[i];
+        m.update(t);
 
-        if(!this.minions[i].active){
+
+        if(pointInCircle(m.left, m.top, m.target_base.left, m.target_base.top, m.target_base.scale)){
+            m.active = false;
+            m.target_base.hitByMinion(m);
+        }
+
+        if(!m.active){
             this.minions.splice(i--, 1);
             --len;
         }
@@ -389,11 +402,23 @@ Game.prototype.trySendMinion = function(source_id, target_id) {
     var source = this.bases.byID(source_id);
     var target = this.bases.byID(target_id);
 
-    if(source.trySendMinion()){
-        var m = new Minion(source, target, 0.001);
 
-        this.minions.add(m);
-        // this.broadcast('');
+    /*
+     * This might cause problem if 'source' switches player before this is getting called
+     * Might be wrong player
+     */
+    var player = source.player;
+
+    if(!source || !target || !player)
+        return;
+
+    if(source.trySendMinion()){
+        var m = new Minion(player.id, source, target, 0.008);
+
+        this.minions.push(m);
+        this.broadcast('GAME.minion', {
+            minion: m.setupJSON()
+        });
     }
 };
 
@@ -421,7 +446,7 @@ function InitLevel(game, name){
 
             game.bases[0] = new Base(game, 0.20, 0.25, 0.07, 10);
             game.bases[1] = new Base(game, 0.20, 0.75, 0.07, 10);
-            game.bases[2] = new Base(game, 0.5,  0.5,  0.10, 20); // MIDDLE
+            game.bases[2] = new Base(game, 0.5,  0.5,  0.10, 20, 50); // MIDDLE
             game.bases[3] = new Base(game, 0.80, 0.25, 0.07, 10);
             game.bases[4] = new Base(game, 0.80, 0.75, 0.07, 10);
 
@@ -453,7 +478,7 @@ function InitLevel(game, name){
 /** [ BASE ]
  *
  */
-function Base(game, left, top, scale, resources){
+function Base(game, left, top, scale, resources, resources_max){
     this.game = game;
 
     this.left = left;
@@ -465,10 +490,10 @@ function Base(game, left, top, scale, resources){
     this.player = null;
 
     this.resources = resources || 10;
-    this.resources_max = 60;
+    this.resources_max = resources_max || 20;
 
     this.spawn_delay = 0;
-    this.spawn_delay_max = 0.5;
+    this.spawn_delay_max = 0.1;
 
     this.resource_increase_delay_max = 2.0;
     this.resource_increase_delay = this.resource_increase_delay_max;
@@ -481,6 +506,7 @@ Base.prototype.setupJSON = function() {
     return {
         id: this.id,
         resources: this.resources,
+        resources_max: this.resources_max,
         left: this.left,
         top: this.top,
         scale: this.scale,
@@ -492,6 +518,8 @@ Base.prototype.setupJSON = function() {
  * @param  {Number} t
  */
 Base.prototype.update = function(t) {
+    if(this.spawn_delay > 0)
+        this.spawn_delay -= t;
 
     if(this.player){
         this.resource_increase_delay -= t;
@@ -529,12 +557,45 @@ Base.prototype.setPlayer = function(player) {
  * Returns the result and sets new delay if able
  */
 Base.prototype.trySendMinion = function() {
-    if(this.spawn_delay <= 0.0){
+    if(this.spawn_delay <= 0.0 && this.resources > 0){
         this.spawn_delay = this.spawn_delay_max;
         --this.resources;
         return true;
     }
     return false;
+};
+
+Base.prototype.hitByMinion = function(minion){
+    var send_data = {
+        minion_id: minion.id
+    };
+
+    // See if it is own minion
+    if(this.player && minion.player_id === this.player.id){
+        ++this.resources;
+    }
+    else {
+        --this.resources;
+
+        // See if resources go below zero
+        //  and should changed owner
+        if(this.resources < 0){
+            this.resources = 1;
+
+            // Fetch player
+            var player = this.game.players.byID(minion.player_id);
+
+            // Set player as owner
+            this.setPlayer(player);
+
+            // Add to send data
+            send_data.new_player_id = player.id;
+        }
+    }
+
+    send_data.resources = this.resources;
+
+    this.game.broadcast('MINION.hit', send_data);
 };
 
 
@@ -551,14 +612,18 @@ Base.prototype.trySendMinion = function() {
  * @param {Number}  size
  * @param {String}  color
  */
-function Minion(source, target, size){
+function Minion(player_id, source, target, scale){
     this.source_base = source;
     this.target_base = target;
 
+    this.player_id = player_id;
+
+    this.id = uniqueID('minion');
+
     this.left = this.source_base.left;
     this.top = this.source_base.top;
-    this.size = size || 0.001;
-    this.color = this.source_base.color;
+    this.scale = scale || 0.001;
+    // this.color = this.source_base.color;
 
     this.active = true;
 
@@ -567,12 +632,12 @@ function Minion(source, target, size){
 
     this.speed = 3;
 
-    this.resize();
+    this.calcSpeed();
 }
 /** 
- * { RESIZE }
+ * { CALCULATE SPEED }
  */
-Minion.prototype.resize = function() {
+Minion.prototype.calcSpeed = function() {
     var delta_speed = 1 / this.speed;
 
     var distance = vecDistance(this.source_base.left, this.source_base.top, this.target_base.left, this.target_base.top);
@@ -591,10 +656,21 @@ Minion.prototype.update = function(t) {
 
     this.left = this.source_base.left + this.vel_left * this.active_time;
     this.top = this.source_base.top + this.vel_top * this.active_time;
-
-    if(pointInCircle(this.left, this.top, this.target_base.left, this.target_base.top, this.target_base.size)){
-        this.active = false;
-    }
+};
+/**
+ * { SETUP JSON }
+ * Get information that is shared across network
+ */
+Minion.prototype.setupJSON = function() {
+    return {
+        id: this.id,
+        player_id: this.player_id,
+        // left: this.left,
+        // top: this.top,
+        scale: this.scale,
+        source_id: this.source_base.id,
+        target_id: this.target_base.id
+    };
 };
 
 
@@ -767,7 +843,7 @@ var randomColor = (function(){
             // ];
             colors = [
                 '#F0F8FF',
-                '#FAEBD7','#00FFFF','#7FFFD4','#F0FFFF','#F5F5DC','#FFE4C4','#000000','#FFEBCD','#0000FF',
+                '#FAEBD7','#00FFFF','#7FFFD4','#F0FFFF','#F5F5DC','#FFE4C4','#04060E','#FFEBCD','#0000FF',
                 '#8A2BE2','#A52A2A','#DEB887','#5F9EA0','#7FFF00','#D2691E','#FF7F50','#6495ED','#FFF8DC',
                 '#DC143C','#00FFFF','#00008B','#008B8B','#B8860B','#A9A9A9','#006400','#BDB76B','#8B008B',
                 '#556B2F','#FF8C00','#9932CC','#8B0000','#E9967A','#8FBC8F','#483D8B','#2F4F4F','#00CED1',
@@ -782,7 +858,7 @@ var randomColor = (function(){
                 '#CD853F','#FFC0CB','#DDA0DD','#B0E0E6','#800080','#FF0000','#BC8F8F','#4169E1','#8B4513',
                 '#FA8072','#F4A460','#2E8B57','#FFF5EE','#A0522D','#C0C0C0','#87CEEB','#6A5ACD','#708090',
                 '#FFFAFA','#00FF7F','#4682B4','#D2B48C','#008080','#D8BFD8','#FF6347','#40E0D0','#EE82EE',
-                '#F5DEB3','#FFFFFF','#F5F5F5','#FFFF00','#9ACD32'
+                '#F5DEB3','#F2F46F','#F5F5F5','#FFFF00','#9ACD32'
             ];
         }
 
