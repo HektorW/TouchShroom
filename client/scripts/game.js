@@ -1,5 +1,6 @@
 
-import Sound from './soundmanager';
+import Sound from './soundmanager.js';
+import _ from './underscore.js'
 
 
 export default class Game {
@@ -38,9 +39,21 @@ export default class Game {
   initEvents() {
     
   }
+
+
+  resize() {
+    this.width  = this.canvas.width  = window.innerWidth;
+    this.height = this.canvas.height = window.innerHeight;
+
+    _.each(this.bases, e => e.resize());
+    _.each(this.minions, e => e.resize());
+    _.each(this.particles, e => e.resize());
+  }
 }
 
-function hehe() {
+
+
+function heheScopeAwaySillyImplementation() {
 
   /**
    * { INIT }
