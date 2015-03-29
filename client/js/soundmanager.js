@@ -1,4 +1,12 @@
 
+
+let AudioContext = window.AudioContext ||
+                   window.webkitAudioContext ||
+                   window.mozNow ||
+                   window.msNow ||
+                   undefined;
+
+
 export default class Sound {
 
   constructor() {

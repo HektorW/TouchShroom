@@ -1,4 +1,4 @@
 
-import App from './app'
+import Game from './game'
 
-var app = window.app = new App().init();
+var game = window.game = new Game().init();
