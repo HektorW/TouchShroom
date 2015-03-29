@@ -24,26 +24,28 @@ export default class Sound {
     this.ctx = new AudioContext();
 
     this.initSounds();
+
+    return this;
   }
 
 
   initSounds() {  
-    this.loadSound('sound/marimba/c4.wav', 'c4');
-    this.loadSound('sound/marimba/d4.wav', 'd4');
-    this.loadSound('sound/marimba/e4.wav', 'e4');
-    this.loadSound('sound/marimba/f4.wav', 'f4');
-    this.loadSound('sound/marimba/g4.wav', 'g4');
-    this.loadSound('sound/marimba/a4.wav', 'a4');
-    this.loadSound('sound/marimba/b4.wav', 'b4');
-    this.loadSound('sound/marimba/c5.wav', 'c5');
-    this.loadSound('sound/marimba/d5.wav', 'd5');
-    this.loadSound('sound/marimba/e5.wav', 'e5');
-    this.loadSound('sound/marimba/f5.wav', 'f5');
-    this.loadSound('sound/marimba/g5.wav', 'g5');
-    this.loadSound('sound/marimba/a5.wav', 'a5');
-    this.loadSound('sound/marimba/b5.wav', 'b5');
-    this.loadSound('sound/marimba/c6.wav', 'c6');
-    this.loadSound('sound/marimba/d6.wav', 'd6');
+    this.loadSound('/res/sounds/marimba/c4.wav', 'c4');
+    this.loadSound('/res/sounds/marimba/d4.wav', 'd4');
+    this.loadSound('/res/sounds/marimba/e4.wav', 'e4');
+    this.loadSound('/res/sounds/marimba/f4.wav', 'f4');
+    this.loadSound('/res/sounds/marimba/g4.wav', 'g4');
+    this.loadSound('/res/sounds/marimba/a4.wav', 'a4');
+    this.loadSound('/res/sounds/marimba/b4.wav', 'b4');
+    this.loadSound('/res/sounds/marimba/c5.wav', 'c5');
+    this.loadSound('/res/sounds/marimba/d5.wav', 'd5');
+    this.loadSound('/res/sounds/marimba/e5.wav', 'e5');
+    this.loadSound('/res/sounds/marimba/f5.wav', 'f5');
+    this.loadSound('/res/sounds/marimba/g5.wav', 'g5');
+    this.loadSound('/res/sounds/marimba/a5.wav', 'a5');
+    this.loadSound('/res/sounds/marimba/b5.wav', 'b5');
+    this.loadSound('/res/sounds/marimba/c6.wav', 'c6');
+    this.loadSound('/res/sounds/marimba/d6.wav', 'd6');
   }
 
 

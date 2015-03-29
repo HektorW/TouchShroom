@@ -1,0 +1,69 @@
+/**
+ * Z-indices:
+ *  10 - Centered absolute (removed)
+ *  20 - Overlay
+ */
+
+html {
+    width:100%;
+    height:100%;
+    overflow: hidden;
+}
+body {
+    margin:0;
+    overflow: hidden;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    background-color: #333;
+    height:100%;
+    color: white;
+    font-family: arial;
+}
+
+#output {
+    position:absolute;
+    left:0;
+    top:0;
+}
+
+.centered_absolute {
+    font-family: monospace;
+    position: absolute;
+    top: 0;
+    left: 50%;
+    cursor: default;
+    text-shadow: 1px 1px 1px black;
+
+    div {
+        position: relative;
+        left: -50%;
+    }
+}
+
+.hidden { display: none; }
+
+
+/* SCREEN */
+.screen_wrapper {
+    display: table;
+    height: 100%;
+    width: 100%;
+}
+.screen_cell {
+    display: table-cell;
+    vertical-align: middle;
+}
+.screen {
+    text-align: center;
+
+    button {
+        font-size: 4em;
+        font-family: monospace;
+        border-radius: 10px;
+    }
+}
+
+
+@import 'overlay';
