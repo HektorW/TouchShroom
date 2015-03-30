@@ -1,6 +1,9 @@
 
-import Sound from './soundmanager.js';
-import _ from './underscore.js'
+import { requestAnimationFrame, cancelAnimationFrame, performance } from './util/prefixer';
+import { drawLine, drawCircle } from './util/draw';
+
+import Sound from './soundmanager';
+import Particle from './objects/particle';
 
 
 export default class Game {
@@ -26,30 +29,209 @@ export default class Game {
     this.animationFrame = null;
   }
 
+  bindFunctions() {
+    this.loop = this.loop.bind(this);
+  }
+
+
   init() {
     this.soundManager = new Sound().init();
 
     this.canvas = document.querySelector('#canvas');
     this.ctx = this.canvas.getContext('2d');
 
+    this.bindFunctions();
+    this.setupWierdArrayFunctions();
+    this.initEvents();
+
+    this.resize();
+
     return this;
   }
 
 
-  initEvents() {
-    
+  setupWierdArrayFunctions() {
+    this.players.findBy = function(prop, value) {
+      for (let i = this.length; i--; ) {
+        if (this[i][prop] === value) return this[i];
+      }
+    };
+
+    this.players.byID = function(id) {
+      for (let i = this.length; i--; ) {
+        if (this[i].id === id) return this[i];
+      }
+    };
+
+    // Add method to base list
+    this.bases.indexByID = function(id) {
+      for (var i = this.length; i--; ) {
+        if(this[i].id === id) return i;
+      }
+    };
+
+    this.bases.byID = function(id){
+      for(var i = this.length; i--; ){
+        if(this[i].id === id) return this[i];
+      }
+    };
+
+    // MINION
+    this.minions.byID = function(id){
+      for(var i = this.length; i--; ){
+        if(this[i].id === id) return this[i];
+      }
+    };
   }
+
+
+  initEvents() {
+
+  }
+
+
+
+  start() {
+    this.now = this.last_time = performance.now();
+    this.animationFrame = requestAnimationFrame(this.loop);
+  }
+
+
+
+
+
+  loop() {
+    requestAnimationFrame(this.loop);
+
+    if (this.draw_time)
+      this.draw_time = time - this.draw_time;
+
+    this.now = time;
+    var elapsed = (time - this.last_time) / 1000.0;
+    this.last_time = time;
+
+    this.update_time = time;
+    this.update(elapsed);
+    this.update_time = performance.now() - this.update_time;
+
+    this.draw_time = performance.now();
+    this.draw();
+  }
+
+
+
+  update() {
+
+  }
+
+  draw () {
+    var ctx = this.ctx;
+
+    ctx.clearRect(0, 0, this.width, this.height);
+
+    //////////////////
+    // Draw minions //
+    //////////////////
+    for(let i = 0, len = this.minions.length; i < len; i++) {
+      let m = this.minions[i];
+      if(m.active) m.draw(ctx);
+    }
+
+    ///////////////
+    // Draw line //
+    ///////////////
+    if (this.selected_base){
+      let b = this.selected_base;
+
+      let x, y;
+      if (this.targeted_base){
+        x = this.targeted_base.x;
+        y = this.targeted_base.y;
+      }
+      else {
+        x = TOUCH.x;
+        y = TOUCH.y;
+      }
+
+      ctx.save();
+
+      ctx.globalAlpha = 0.3;
+      let line_size = 5;
+      let color = GAME.me.color || '#AAA' ;
+      drawLine(ctx, b.x, b.y, x, y, color, line_size);
+      drawCircle(ctx, x, y, line_size / 2, color);
+
+      ctx.restore();
+    }
+
+    ////////////////
+    // Draw bases //
+    ////////////////
+    for(let i = 0, len = this.bases.length; i < len; i++){
+      this.bases[i].draw(ctx);
+    }
+
+    ////////////////////
+    // DRAW PARTICLES //
+    ////////////////////
+    for(let i = 0, len = this.particles.length; i < len; i++){
+      this.particles[i].draw(ctx);
+    }
+
+
+    ////////////////
+    // DRAW SCORE //
+    ////////////////
+    this.drawScoreBar(ctx);
+  }
+
+  drawScoreBar(ctx) {
+    ctx.save();
+
+    let w = width / 1.5;
+    let h = height / 20;
+    let x = (width / 2) - (w / 2);
+    let y = (height / 20) - (h / 2);
+
+    let r = [];
+    let total = 0;
+    for (let i = 0, len = this.players.length; i < len; i++){
+      r[i] = this.players[i].totalResources();
+      total += r[i];
+    }
+
+    let xt = x;
+    for (let i = 0, len = this.players.length; i < len; i++){
+      ctx.fillStyle = this.players[i].color;
+      let wt = (r[i] / total) * w;
+      ctx.fillRect(xt, y, wt, h);
+      let text = this.players[i].name + ' - ' + r[i];
+      ctx.fillStyle = 'black';
+      ctx.fillText(text, xt + (wt/2) - (ctx.measureText(text).width/2), y+(h/2));
+
+      xt += wt;
+    }
+
+
+    ctx.strokeStyle = 'white';
+    ctx.strokeRect(x, y, w, h);
+
+    ctx.restore();
+  }
+
+
 
 
   resize() {
     this.width  = this.canvas.width  = window.innerWidth;
     this.height = this.canvas.height = window.innerHeight;
 
-    _.each(this.bases, e => e.resize());
-    _.each(this.minions, e => e.resize());
-    _.each(this.particles, e => e.resize());
+    this.bases.forEach(e => e.resize());
+    this.minions.forEach(e => e.resize());
+    this.particles.forEach(e => e.resize());
   }
 }
+
 
 
 
@@ -61,50 +243,6 @@ function heheScopeAwaySillyImplementation() {
    * General initialization not bound to a game instance
    */
   GAME.init = function(){
-    SOUND.init();
-
-    GAME.canvas = document.querySelector('#canvas');
-    GAME.ctx = GAME.canvas.getContext('2d');
-
-    // Find element in array by property
-    GAME.players.findBy = function(prop, value){
-      for(var i = 0, len = this.length; i < len; i++){
-        if(this[i][prop] === value)
-          return this[i];
-      }
-      return undefined;
-    };
-    GAME.players.byID = function(id){
-      for(var i = 0, len = this.length; i < len; i++){
-        if(this[i].id === id)
-          return this[i];
-      }
-    };
-
-    // Add method to base list
-    GAME.bases.indexByID = function(id){
-      for (var i = this.length - 1; i >= 0; i--) {
-        if(this[i].id === id)
-          return i;
-      }
-      return undefined;
-    };
-    GAME.bases.byID = function(id){
-      for(var i = 0, len = this.length; i < len; i++){
-        if(this[i].id === id)
-          return this[i];
-      }
-    };
-
-    // MINION
-    GAME.minions.byID = function(id){
-      for(var i = 0, len = this.length; i < len; i++){
-        if(this[i].id === id)
-          return this[i];
-      }
-    };
-
-    GAME.resize();
 
     ////////////////////
     // SETUP CONTROLS //
@@ -198,21 +336,8 @@ function heheScopeAwaySillyImplementation() {
 
     // GAME.draw();
   };
-  /**
-   * { RESIZE }
-   * Resize canvas and fix scales
-   */
-  GAME.resize = function(){
-    var i;
 
-    GAME.width  = GAME.canvas.width  = window.innerWidth;
-    GAME.height = GAME.canvas.height = window.innerHeight;
 
-    function r(e){e.resize();}
-    GAME.bases.forEach(r);
-    GAME.minions.forEach(r);
-    GAME.particles.forEach(r);
-  };
   /**
    * { START }
    * Starts the game
@@ -398,34 +523,6 @@ function heheScopeAwaySillyImplementation() {
           this.hovered_base = b;
         }
       }
-
-
-      /////////
-      // OLD //
-      /////////
-      // if(!b.selected && pointInCircle(TOUCH.x, TOUCH.y, b.x, b.y, b.size)){
-      //     if(this.selected_base){
-      //         b.targeted = true;
-      //         this.targeted_base = b;
-
-      //         if(this.selected_base.spawn_delay <= 0.0){
-      //             // Send to server
-      //             NET.socket.emit('p.minion', {
-      //                 source_id: this.selected_base.player_id,
-      //                 target_id: this.targeted_base.player_id
-      //             });
-
-      //             // this.minions.push(
-      //             //     new Minion(this.selected_base, this.targeted_base)
-      //             //     );
-
-      //             this.selected_base.spawn_delay = this.selected_base.spawn_delay_max;
-      //         }
-      //     } else {
-      //         b.hovered = true;
-      //         this.hovered_base = b;
-      //     }
-      // }
     }
 
 
@@ -466,63 +563,7 @@ function heheScopeAwaySillyImplementation() {
    * Draw the scene
    */
   GAME.draw = function(){
-    var i, len, b, m, x, y;
-
-    GAME.ctx.clearRect(0, 0, GAME.width, GAME.height);
-
-    //////////////////
-    // Draw minions //
-    //////////////////
-    for(i = 0, len = this.minions.length; i < len; i++){
-      m = this.minions[i];
-      if(m.active)
-        m.draw(this.ctx);
-    }
-
-    ///////////////
-    // Draw line //
-    ///////////////
-    if(this.selected_base){
-      b = this.selected_base;
-      if(this.targeted_base){
-        x = this.targeted_base.x;
-        y = this.targeted_base.y;
-      }
-      else {
-        x = TOUCH.x;
-        y = TOUCH.y;
-      }
-
-      GAME.ctx.save();
-
-      GAME.ctx.globalAlpha = 0.3;
-      var line_size = 5;
-      var color = GAME.me.color || '#AAA' ;
-      drawLine(GAME.ctx, b.x, b.y, x, y, color, line_size);
-      drawCircle(GAME.ctx, x, y, line_size / 2, color);
-
-      GAME.ctx.restore();
-    }
-
-    ////////////////
-    // Draw bases //
-    ////////////////
-    for(i = 0, len = this.bases.length; i < len; i++){
-      this.bases[i].draw(this.ctx);
-    }
-
-    ////////////////////
-    // DRAW PARTICLES //
-    ////////////////////
-    for(i = 0, len = this.particles.length; i < len; i++){
-      this.particles[i].draw(this.ctx);
-    }
-
-
-    ////////////////
-    // DRAW SCORE //
-    ////////////////
-    GAME.drawScoreBar();
+    
   };
   GAME.send = function(msg, data){
     NET.send(msg, data);
@@ -534,44 +575,7 @@ function heheScopeAwaySillyImplementation() {
    *     Only update when score has updated
    */
   GAME.drawScoreBar = function(){
-    var x, y, w, h, i, len, r, total, a, xt, wt, text;
-
-    GAME.ctx.save();
-
-    w = GAME.width / 1.5;
-    h = GAME.height / 20;
-    x = (GAME.width / 2) - (w / 2);
-    y = (GAME.height / 20) - (h / 2);
-
-    r = [];
-    total = 0;
-    for(i = 0, len = GAME.players.length; i < len; i++){
-      r[i] = GAME.players[i].totalResources();
-      total += r[i];
-    }
-
-    xt = x;
-    for(i = 0, len = GAME.players.length; i < len; i++){
-      GAME.ctx.fillStyle = GAME.players[i].color;
-      wt = (r[i] / total) * w;
-      GAME.ctx.fillRect(
-        xt,
-        y,
-        wt,
-        h
-      );
-      text = GAME.players[i].name + ' - ' + r[i];
-      GAME.ctx.fillStyle = 'black';
-      GAME.ctx.fillText(text, xt + (wt/2) - (GAME.ctx.measureText(text).width/2), y+(h/2));
-
-      xt += wt;
-    }
-
-
-    GAME.ctx.strokeStyle = 'white';
-    GAME.ctx.strokeRect(x, y, w, h);
-
-    GAME.ctx.restore();
+    
   };
   /**
    * { START TOUCH }

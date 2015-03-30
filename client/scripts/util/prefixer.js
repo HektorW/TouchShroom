@@ -20,8 +20,24 @@ let cancelAnimationFrame = (function() {
 }());
 
 
+let performance = window.performance = {};
+performance.now = performance.now ||
+                  performance.webkitNow ||
+                  performance.mozNow ||
+                  performance.msNow ||
+                  function() { return (new Date()).getTime(); };
+
+
+let AudioContext = window.AudioContext ||
+                   window.webkitAudioContext ||
+                   window.mozNow ||
+                   window.msNow ||
+                   undefined;
+
 
 module.exports = {
   requestAnimationFrame,
-  cancelAnimationFrame
+  cancelAnimationFrame,
+  performance,
+  AudioContext
 };

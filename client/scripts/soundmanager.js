@@ -1,10 +1,8 @@
 
 
-let AudioContext = window.AudioContext ||
-                   window.webkitAudioContext ||
-                   window.mozNow ||
-                   window.msNow ||
-                   undefined;
+import { randomRangeInt } from './util/util.js';
+import { AudioContext } from './util/prefixer.js';
+
 
 
 export default class Sound {
@@ -17,7 +15,7 @@ export default class Sound {
   }
 
   init() {
-    if (!window.AudioContext) {
+    if (!AudioContext) {
       throw "AudioContext not supported by browser";
     }
 
@@ -76,7 +74,7 @@ export default class Sound {
   playSound(name) {
     if (!this.sounds[name]) return;
 
-    let sound = this.tx.createBufferSource();
+    let sound = this.ctx.createBufferSource();
     sound.buffer = this.sounds[name];
 
     let gain = this.createGainNode(0.8, 0.0, 0.4);
@@ -84,7 +82,7 @@ export default class Sound {
     sound.connect(gain);
     gain.connect(this.ctx.destination);
 
-    sound.noteOn(0);
+    sound.start(0);
   }
 
   createGainNode(start, end, time) {
@@ -94,7 +92,7 @@ export default class Sound {
     node.gain.linearRampToValueAtTime(start, now);
     node.gain.linearRampToValueAtTime(end, now + time);
 
-    return gain;
+    return node;
   }
 
   playRandomSound() {

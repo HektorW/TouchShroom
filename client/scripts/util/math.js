@@ -9,6 +9,7 @@ function pointInCircle(px, py, cx, cy, cr){
     return (vecDistanceSq(px, py, cx, cy) < Math.pow(cr, 2));
 }
 
+
 module.exports = {
   vecDistanceSq,
   vecDistance,
