@@ -2,8 +2,14 @@
 import { requestAnimationFrame, cancelAnimationFrame, performance } from './util/prefixer';
 import { drawLine, drawCircle } from './util/draw';
 
-import Sound from './soundmanager';
+import SoundManager from './soundmanager';
+import InputManager from './inputmanager';
+import NetworkManager from './networkmanager';
+
 import Particle from './objects/particle';
+import Player from './objects/player';
+import Base from './objects/base';
+import Minion from './objects/minion';
 
 
 export default class Game {
@@ -29,24 +35,30 @@ export default class Game {
     this.animationFrame = null;
   }
 
-  bindFunctions() {
-    this.loop = this.loop.bind(this);
-  }
-
 
   init() {
-    this.soundManager = new Sound().init();
+    this.soundManager = new SoundManager().init();
+    this.networkManager = new NetworkManager().init();
+    this.inputManager = new InputManager(this).init();
 
     this.canvas = document.querySelector('#canvas');
     this.ctx = this.canvas.getContext('2d');
 
     this.bindFunctions();
-    this.setupWierdArrayFunctions();
     this.initEvents();
+    this.setupWierdArrayFunctions();
 
     this.resize();
 
     return this;
+  }
+
+  bindFunctions() {
+    this.loop = this.loop.bind(this);
+  }
+
+  initEvents() {
+    window.addEventListener('resize', this.resize.bind(this), false);
   }
 
 
@@ -85,10 +97,41 @@ export default class Game {
   }
 
 
-  initEvents() {
+  setup(data) {
+    let lvl_name = data.level_name;
+    let my_id = data.my_id;
+    let players = data.players;
 
+    // timed('Level: ' + lvl_name);
+
+    for(let i = 0, len = data.bases.length; i < len; i++){
+      let b = data.bases[i];
+      this.bases.push(
+        new Base(this, b.id, b.left, b.top, b.scale, b.resources, b.resources_max)
+      );
+    }
+    for(let i = 0, len = players.length; i < len; i++){
+      let playerData = players[i];
+
+      let player = new Player(
+        this,
+        playerData.id,
+        playerData.name,
+        playerData.color
+      );
+
+      let startStates = data.start_state[i];
+      startStates.forEach(i => this.bases[i].setPlayer(player));
+
+      this.players.push(player);
+
+      if (playerData.id === my_id){
+        this.me = player;
+      }
+    }
+
+    this.send('PLAYER.ready');
   }
-
 
 
   start() {
@@ -96,8 +139,22 @@ export default class Game {
     this.animationFrame = requestAnimationFrame(this.loop);
   }
 
+  end() {
+    if(this.animationFrame) cancelAnimationFrame(this.animationFrame);
 
+    // CLEAN UP GAME
+    this.bases.length = 0;
+    this.players.length = 0;
+    this.me = null;
+    this.minions.length = 0;
+    this.particles.length = 0;
 
+    // Temporary solution to hide overlay and go back to START
+    setTimeout(function(){
+      // CONTROLLER.overlayHide();
+      // CONTROLLER.setScreen('start');
+    }, 3000);
+  }
 
 
   loop() {
@@ -119,23 +176,21 @@ export default class Game {
   }
 
 
-
-  update() {
-
+  update(time) {
+    this.inputManager.update(time);
   }
+
 
   draw () {
     var ctx = this.ctx;
-
     ctx.clearRect(0, 0, this.width, this.height);
 
-    //////////////////
-    // Draw minions //
-    //////////////////
+
     for(let i = 0, len = this.minions.length; i < len; i++) {
       let m = this.minions[i];
-      if(m.active) m.draw(ctx);
+      if (m.active) m.draw(ctx);
     }
+
 
     ///////////////
     // Draw line //
@@ -147,41 +202,30 @@ export default class Game {
       if (this.targeted_base){
         x = this.targeted_base.x;
         y = this.targeted_base.y;
-      }
-      else {
-        x = TOUCH.x;
-        y = TOUCH.y;
+      } else {
+        x = this.inputManager.pointer.x;
+        y = this.inputManager.pointer.y;
       }
 
       ctx.save();
 
       ctx.globalAlpha = 0.3;
       let line_size = 5;
-      let color = GAME.me.color || '#AAA' ;
+      let color = this.me.color || '#AAA' ;
       drawLine(ctx, b.x, b.y, x, y, color, line_size);
       drawCircle(ctx, x, y, line_size / 2, color);
 
       ctx.restore();
     }
 
-    ////////////////
-    // Draw bases //
-    ////////////////
     for(let i = 0, len = this.bases.length; i < len; i++){
       this.bases[i].draw(ctx);
     }
 
-    ////////////////////
-    // DRAW PARTICLES //
-    ////////////////////
     for(let i = 0, len = this.particles.length; i < len; i++){
       this.particles[i].draw(ctx);
     }
 
-
-    ////////////////
-    // DRAW SCORE //
-    ////////////////
     this.drawScoreBar(ctx);
   }
 
@@ -220,8 +264,6 @@ export default class Game {
   }
 
 
-
-
   resize() {
     this.width  = this.canvas.width  = window.innerWidth;
     this.height = this.canvas.height = window.innerHeight;
@@ -230,6 +272,32 @@ export default class Game {
     this.minions.forEach(e => e.resize());
     this.particles.forEach(e => e.resize());
   }
+
+
+
+  trySendMinion(target) {
+    target.targeted = true;
+    this.targeted_base = target;
+
+    // Call 'canSendMinion' on selected_base
+    // [CHANGED] Allways ask server to send
+    if (this.selected_base.canSendMinion() || true){
+      this.networkManager.send('BASE.minion', {
+        source_id: this.selected_base.id,
+        target_id: target.id
+      });
+    }
+  }
+
+  getByID(list, id) {
+    for (let i = list.length; i--; ) {
+      let item = list[i];
+      if (item && item.id == id) {
+        return item;
+      }
+    }
+  }
+
 }
 
 
@@ -237,137 +305,7 @@ export default class Game {
 
 function heheScopeAwaySillyImplementation() {
 
-  /**
-   * { INIT }
-   * Main entry point for initialization
-   * General initialization not bound to a game instance
-   */
-  GAME.init = function(){
 
-    ////////////////////
-    // SETUP CONTROLS //
-    ////////////////////
-    function startTouch(x, y){
-      TOUCH.down = true;
-      TOUCH.start_x = TOUCH.x = x;
-      TOUCH.start_y = TOUCH.y = y;
-      GAME.startTouch();
-    }
-    function drag(x, y){
-      TOUCH.old_x = TOUCH.x;
-      TOUCH.old_y = TOUCH.y;
-      TOUCH.x = x;
-      TOUCH.y = y;
-    }
-    function endTouch(x, y){
-      TOUCH.down = false;
-      TOUCH.end_x = x;
-      TOUCH.end_y = y;
-      TOUCH.x = -1;
-      TOUCH.y = -1;
-      GAME.endTouch();
-    }
-    GAME.canvas.addEventListener('mousedown', function(e){
-      e.preventDefault();
-      startTouch(e.pageX, e.pageY);
-    }, false);
-    GAME.canvas.addEventListener('mousemove', function(e){
-      e.preventDefault();
-      drag(e.pageX, e.pageY);
-    }, false);
-    GAME.canvas.addEventListener('mouseup', function(e){
-      e.preventDefault();
-      endTouch(e.pageX, e.pageY);
-    }, false);
-    GAME.canvas.addEventListener('touchstart', function(e){
-      e.preventDefault();
-      startTouch(e.changedTouches[0].pageX, e.changedTouches[0].pageY);
-    }, false);
-    GAME.canvas.addEventListener('touchend', function(e){
-      e.preventDefault();
-      endTouch(e.changedTouches[0].pageX, e.changedTouches[0].pageY);
-    }, false);
-    GAME.canvas.addEventListener('touchmove', function(e){
-      e.preventDefault();
-      drag(e.changedTouches[0].pageX, e.changedTouches[0].pageY);
-    }, false);
-    window.addEventListener('resize', GAME.resize, false);
-  };
-  /**
-   * { SETUP }
-   * Setup a specific game with info from server
-   * @param  {Object} data  Setup data from server (players, level)
-   */
-  GAME.setup = function(data){
-    var i, b, p, len;
-
-    var lvl_name = data.level_name;
-    var my_id = data.my_id;
-    var players = data.players;
-
-    timed('Level: ' + lvl_name);
-
-    for(i = 0, len = data.bases.length; i < len; i++){
-      b = data.bases[i];
-      this.bases.push(
-        new Base(b.id, b.left, b.top, b.scale, b.resources, b.resources_max)
-      );
-    }
-    for(i = 0, len = players.length; i < len; i++){
-      p = new Player(
-        players[i].id,
-        players[i].name,
-        players[i].color
-      );
-
-      b = data.start_state[i];
-      b.forEach(function(i){ // Know that this will push closer to GC (garbage collector)
-        this.bases[i].setPlayer(p);
-      }, this);
-
-      GAME.players.push(p);
-
-      if(players[i].id === my_id){
-        GAME.me = p;
-      }
-    }
-
-    GAME.send('PLAYER.ready');
-
-    // GAME.draw();
-  };
-
-
-  /**
-   * { START }
-   * Starts the game
-   */
-  GAME.start = function(){
-    GAME.now = GAME.last_time = window.performance.now();
-    GAME.animationFrame = window.requestAnimationFrame(GAME.loop);
-  };
-  /**
-   * { END }
-   * Called when server tells to end game
-   */
-  GAME.end = function(){
-    if(GAME.animationFrame)
-      window.cancelAnimationFrame(GAME.animationFrame);
-
-
-    // CLEAN UP GAME
-    GAME.bases.length = 0;
-    GAME.players.length = 0;
-    GAME.me = null;
-    GAME.minions.length = 0;
-    GAME.particles.length = 0;
-
-    // Temporary solution to hide overlay and go back to START
-    setTimeout(function(){
-      CONTROLLER.overlayHide();
-      CONTROLLER.setScreen('start');
-    }, 3000);
-  };
 
   ////////////
   // EVENTS //
@@ -448,31 +386,6 @@ function heheScopeAwaySillyImplementation() {
     }
   };
 
-
-  /**
-   * { LOOP }
-   * First entry point for game loop
-   * @param  {Number} time    Time from performance.now
-   */
-  GAME.loop = function(time){
-    if(GAME.draw_time)
-      GAME.draw_time = time - GAME.draw_time;
-    GAME.now = time;
-    var elapsed = (time - GAME.last_time) / 1000.0;
-    GAME.last_time = time;
-
-    GAME.update_time = time;
-    GAME.update(elapsed);
-    GAME.update_time = performance.now() - GAME.update_time;
-
-    // out('update', GAME.update_time);
-    // out('draw', GAME.draw_time);
-
-    GAME.draw_time = performance.now();
-    GAME.draw();
-
-    GAME.animationFrame = window.requestAnimationFrame(GAME.loop);
-  };
   /**
    * { UPDATE }
    * @param  {Number} t   Elapsed time since last update (seconds)
@@ -558,40 +471,20 @@ function heheScopeAwaySillyImplementation() {
       }
     }
   };
-  /**
-   * { DRAW }
-   * Draw the scene
-   */
-  GAME.draw = function(){
-    
-  };
+
+
   GAME.send = function(msg, data){
     NET.send(msg, data);
   };
-  /**
-   * { DRAW SCORE }
-   * Draw a score bar
-   * Needs to be tuned for some performance probably
-   *     Only update when score has updated
-   */
-  GAME.drawScoreBar = function(){
-    
-  };
+  
+
+
+
   /**
    * { START TOUCH }
    */
   GAME.startTouch = function(){
     var i, b, len;
-
-    // Test collision against all
-    // for(i = 0; i < this.bases.length; i++){
-    //     b = this.bases[i];
-
-    //     if(pointInCircle(TOUCH.x, TOUCH.y, b.x, b.y, b.size)){
-    //         b.selected = true;
-    //         GAME.selected_base = b;
-    //     }
-    // }
 
     if(!GAME.me)
       return;
@@ -605,17 +498,8 @@ function heheScopeAwaySillyImplementation() {
         break;
       }
     }
-
-
-    /////////
-    // OLD //
-    /////////
-    // // Test just against [me]
-    // if(pointInCircle(TOUCH.x, TOUCH.y, GAME.me.x, GAME.me.y, GAME.me.size)){
-    //     GAME.me.selected = true;
-    //     GAME.selected_base = GAME.me;
-    // }
   };
+
   /**
    * { END TOUCH }
    */
@@ -629,22 +513,4 @@ function heheScopeAwaySillyImplementation() {
       GAME.selected_base = null;
     }
   };
-  /**
-   * { SEND MINION }
-   * Tries to send a minion
-   */
-  GAME.trySendMinion = function(target){
-    target.targeted = true;
-    this.targeted_base = target;
-
-    // Call 'canSendMinion' on selected_base
-    // [CHANGED] Allways ask server to send
-    if(GAME.selected_base.canSendMinion() || true){
-      GAME.send('BASE.minion', {
-        source_id: this.selected_base.id,
-        target_id: target.id
-      });
-    }
-  };
-
 }

@@ -5,7 +5,7 @@ import { AudioContext } from './util/prefixer.js';
 
 
 
-export default class Sound {
+export default class SoundManager {
 
   constructor() {
     this.ctx = null;

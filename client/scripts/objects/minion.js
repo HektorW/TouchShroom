@@ -1,5 +1,5 @@
 
-import { pointInCircle, vecDistance } from './util/math'
+import { pointInCircle, vecDistance } from '../util/math'
 
 
 export default class Minion {

@@ -834,13 +834,6 @@ var randomColor = (function(){
 
     var f = function(){
         if(colors.length <= 0){
-            // colors = [
-            //     '#59111E',
-            //     '#BFA07A',
-            //     '#F28D35',
-            //     '#D95829',
-            //     '#D93030'
-            // ];
             colors = [
                 '#F0F8FF',
                 '#FAEBD7','#00FFFF','#7FFFD4','#F0FFFF','#F5F5DC','#FFE4C4','#04060E','#FFEBCD','#0000FF',
