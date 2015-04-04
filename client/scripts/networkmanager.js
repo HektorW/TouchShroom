@@ -26,6 +26,13 @@ export default class NetworkManager {
     });
   }
 
+  on(event, callback) {
+    this.socket.on(event, callback);
+  }
+  send(event, data) {
+    this.socket.emit(event, data);
+  }
+
   setupSocketEventHandlers() {
     let socket = this.socket;
 
@@ -45,9 +52,16 @@ export default class NetworkManager {
 
     socket.on('MINION.hit', this.onMinionHit.bind(this));
 
-    socket.on('BASE.resources', this.onBaseResources.bind(thits));
+    socket.on('BASE.resources', this.onBaseResources.bind(this));
 
     socket.on('my player', this.onMyPlayer.bind(this));
+
+    socket.on('g.players', this.onGPlayers.bind(this));
+
+    socket.on('p.connection', this.onPConnection.bind(this));
+    socket.on('p.disconnection', this.onPDisconnection.bind(this));
+    
+    socket.on('b.minion', this.onBMinion.bind(this));
   }
 
   send(msg, data) {
@@ -62,11 +76,11 @@ export default class NetworkManager {
   }
   onSocketConnect() {
     this.connected = true;
-    this.controller.connected();
+    // this.controller.connected();
   }
   onSocketDisconnect() {
     this.conected = false;
-    this.controller.disconnected();
+    // this.controller.disconnected();
   }
 
   onServerYourname(data) {
@@ -108,64 +122,70 @@ export default class NetworkManager {
     this.game.me.player_id = data.player.player_id;
     this.game.bases.push(this.game.me);
   }
+
+  // Probably unused
+  // logic seems to be wrong
+  onGPlayers(data) {
+    let players = data.players;
+    let bases = this.game.bases;
+    for(let i = 0, len = players.length; i < len; i++){
+      let index = game.bases.indexByID(players[i].player_id);
+
+      // If player is not in game -> Add
+      if(index === undefined){
+        let base = new Base(players[i].aspect_left, players[i].aspect_top, players[i].aspect_size, players[i].color);
+        base.player_id = players[i].player_id;
+        GAME.bases.push(base);
+      }
+      // Else set values correct
+      else {
+        let base = bases[index];
+        base.aspect_left = players[i].aspect_left;
+        base.aspect_top = players[i].aspect_top;
+        base.aspect_size = players[i].aspect_size;
+        base.color = players[i].color;
+      }
+    }
+
+    // Call resize to fix aspects
+    this.game.resize();
+  }
+
+  onPConnection(data) {
+    if(data.player.player_id !== this.game.me.player_id){
+      var b = new Base(data.player.aspect_left, data.player.aspect_top, data.player.aspect_size, data.player.color);
+      b.player_id = data.player.player_id;
+      this.game.bases.push(b);
+    }
+  }
+
+  // Seems to be unused, logic seems wrong
+  onPDisconnection(data) {
+    var i = this.game.bases.indexByID(data.player_id);
+    if(i !== undefined){
+      this.game.bases.splice(i, 1);
+    }
+  }
+
+  onBMinion(data) {
+    let game = this.game;
+    let bases = game.bases;
+    let sourceBase = game.getByID(bases, data.source_id);
+    let targetBase = game.getByID(bases, data.target_id);
+
+    if (!!sourceBase && !!targetBase) {
+      game.minions.push(
+        new Minion(sourceBase, targetBase)
+      );
+    }
+
+    // var source_index = this.game.bases.indexByID(data.source_id);
+    // var target_index = this.game.bases.indexByID(data.target_id);
+
+    // if(source_index !== undefined && target_index !== undefined){
+    //     this.game.minions.push(
+    //       new Minion(this.game.bases[source_index], this.game.bases[target_index])
+    //     );
+    // }
+  }
 }
-
-
-/** { INIT }
- *
- */
-NET.init = function(){
-
-
-
-    this.socket.on('g.players', function(data){
-        var i, b, len;
-        var p = data.players;
-        for(i = 0, len = p.length; i < len; i++){
-            var index = GAME.bases.indexByID(p[i].player_id);
-
-            // If player is not in game -> Add
-            if(index === undefined){
-                b = new Base(p[i].aspect_left, p[i].aspect_top, p[i].aspect_size, p[i].color);
-                b.player_id = p[i].player_id;
-                GAME.bases.push(b);
-            }
-            // Else set values correct
-            else {
-                b = GAME.bases[index];
-                b.aspect_left = p[i].aspect_left;
-                b.aspect_top = p[i].aspect_top;
-                b.aspect_size = p[i].aspect_size;
-                b.color = p[i].color;
-            }
-        }
-
-        // Call resize to fix aspects
-        GAME.resize();
-    });
-
-    this.socket.on('p.connection', function(data){
-        if(data.player.player_id !== GAME.me.player_id){
-            var b = new Base(data.player.aspect_left, data.player.aspect_top, data.player.aspect_size, data.player.color);
-            b.player_id = data.player.player_id;
-            GAME.bases.push(b);
-        }
-    });
-    this.socket.on('p.disconnection', function(data){
-        var i = GAME.bases.indexByID(data.player_id);
-        if(i !== undefined){
-            GAME.bases.splice(i, 1);
-        }
-    });
-
-    this.socket.on('b.minion', function(data){
-        var source_index = GAME.bases.indexByID(data.source_id);
-        var target_index = GAME.bases.indexByID(data.target_id);
-
-        if(source_index !== undefined && target_index !== undefined){
-            GAME.minions.push(
-                new Minion(GAME.bases[source_index], GAME.bases[target_index])
-                );
-        }
-    });
-};

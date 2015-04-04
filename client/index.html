@@ -14,36 +14,7 @@
 
   <!-- SCREENS -->
   <div class="screen_wrapper">
-    <div class="screen_cell">
-      <!-- LOADING -->
-      <div id="screen_loading" class="screen">
-        <h2>Loading</h2>
-        <img src="res/images/waiting.gif" alt="">
-      </div>
-
-      <!-- NO CONNECT -->
-      <div id="screen_noconnect" class="screen hidden">
-        <img src="res/images/surprised.png" alt="" style="width:20%">
-        <h2>Can't connect!</h2>
-      </div>
-
-      <!-- START -->
-      <div id="screen_start" class="screen hidden">
-        <button id="btn_play">PLAY</button>
-      </div>
-
-      <!-- WAITING -->
-      <div id="screen_waiting" class="screen hidden">
-        <h2>Waiting for opponent!</h2>
-        <img src="res/images/waiting.gif" alt="">
-      </div>
-
-      <!-- GAME  -->
-      <div id="screen_game" class="screen hidden">
-        <canvas id="canvas" width="600" height="400">
-          <p>Your browser doesn't seem to support the Canvas-element :(.</p>
-        </canvas>
-      </div>
+    <div class="screen_cell" data-screen-container>      
     </div>
   </div>
 
@@ -57,7 +28,8 @@
     </div>
   </div>
 
-  <script src="socket.io.js"></script>
+  <script src="libs/socket.io.js"></script>
+  <script src="libs/jquery.js"></script>
   <script src="bundle.js"></script>
 </body>
 </html>

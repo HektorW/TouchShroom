@@ -296,6 +296,7 @@ export default class Game {
         return item;
       }
     }
+    return undefined;
   }
 
 }
