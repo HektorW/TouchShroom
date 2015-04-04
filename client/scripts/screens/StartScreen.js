@@ -6,7 +6,7 @@ export default class StartScreen extends BaseScreen {
   constructor(networkManager, soundManager) {
     super(networkManager, soundManager);
 
-    this.events = {
+    this.domEvents = {
       'click #btn_play': 'onPlayClick'
     };
   }
@@ -22,8 +22,8 @@ export default class StartScreen extends BaseScreen {
   }
 
 
-  onPlayClick(event) {
-    alert();
+  onPlayClick() {
+    this.requestScreen('lobby');
   }
 
 }

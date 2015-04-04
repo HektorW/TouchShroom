@@ -2,6 +2,8 @@
 import LoadingScreen from './screens/LoadingScreen';
 import StartScreen from './screens/StartScreen';
 import GameScreen from './screens/GameScreen';
+import NoConnectionScreen from './screens/NoConnectionScreen';
+import LobbyScreen from './screens/LobbyScreen';
 
 export default class ScreenManager {
 
@@ -9,7 +11,7 @@ export default class ScreenManager {
     this.networkManager = networkManager;
     this.soundManager = soundManager;
 
-    this.screens = [];
+    this.screens = {};
     this.activeScreen = null;
   }
 
@@ -28,17 +30,27 @@ export default class ScreenManager {
   }
 
   initScreens() {
-    this.screens = {
-      'loading': new LoadingScreen(this.networkManager, this.soundManager),
-      'start': new StartScreen(this.networkManager, this.soundManager),
-      'game': new GameScreen(this.networkManager, this.soundManager)
-    };
+    this.screens = {};
+
+    this.screens.loading = new LoadingScreen(this.networkManager, this.soundManager);
+    this.screens.start = new StartScreen(this.networkManager, this.soundManager);
+    this.screens.game = new GameScreen(this.networkManager, this.soundManager);
+    this.screens.noConnection = new NoConnectionScreen(this.networkManager, this.soundManager);
+    this.screens.lobby = new LobbyScreen(this.networkManager, this.soundManager);
+
+    for (let screenName in this.screens) {
+      let screen = this.screens[screenName];
+      screen.on('requestScreen', (data) => {
+        this.setScreen(data.screen);
+      });
+    }
   }
 
   initNetwork() {
     let networkManager = this.networkManager;
 
     networkManager.on('connect', () => this.setScreen(this.screens.start));
+    networkManager.on('disconnect noconnection', () => this.setScreen(this.screens.noConnection));
   }
 
 
@@ -54,6 +66,10 @@ export default class ScreenManager {
   }
 }
 
+
+
+
+function scoopDeDoopAwayWithControloler() {
 
 
 /** TODO
@@ -164,3 +180,4 @@ CONTROLLER.startgame = function(){
 };
 
 
+}

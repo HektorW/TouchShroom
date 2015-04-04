@@ -2,9 +2,9 @@
 // temp
 function timed() { console.log(arguments[0]); }
 
+import { EventEmitter } from 'events';
 
-
-export default class NetworkManager {
+export default class NetworkManager extends EventEmitter {
 
   constructor(controller, game) {
     this.controller = controller;
@@ -24,6 +24,10 @@ export default class NetworkManager {
     this.socket = io.connect(':8888', {
         reconnect: true
     });
+  }
+
+  off(event, callback) {
+    this.socket.removeListener(event, callback);
   }
 
   on(event, callback) {
@@ -71,15 +75,18 @@ export default class NetworkManager {
 
   onSocketError() {
     if (!this.connected) {
-      this.controller.noconnect();
+      // this.controller.noconnect();
+      this.emit('noconnection');
     }
   }
   onSocketConnect() {
     this.connected = true;
+    this.emit('connect');
     // this.controller.connected();
   }
   onSocketDisconnect() {
     this.conected = false;
+    this.emit('disconnect');
     // this.controller.disconnected();
   }
 

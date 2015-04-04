@@ -2,9 +2,7 @@
 import { requestAnimationFrame, cancelAnimationFrame, performance } from './util/prefixer';
 import { drawLine, drawCircle } from './util/draw';
 
-import SoundManager from './soundmanager';
 import InputManager from './inputmanager';
-import NetworkManager from './networkmanager';
 
 import Particle from './objects/particle';
 import Player from './objects/player';
@@ -14,7 +12,10 @@ import Minion from './objects/minion';
 
 export default class Game {
 
-  constructor() {
+  constructor(networkManager, soundManager) {    
+    this.networkManager = networkManager;
+    this.soundManager = soundManager;
+
     this.canvas = null;
     this.ctx = null;
     this.soundManager = null;
@@ -37,8 +38,6 @@ export default class Game {
 
 
   init() {
-    this.soundManager = new SoundManager().init();
-    this.networkManager = new NetworkManager().init();
     this.inputManager = new InputManager(this).init();
 
     this.canvas = document.querySelector('#canvas');
