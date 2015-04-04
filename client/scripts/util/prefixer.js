@@ -1,26 +1,22 @@
 
-let requestAnimationFrame = (function() {
-  return  window.requestAnimationFrame ||
-          window.webkitRequestAnimationFrame ||
-          window.mozRequestAnimationFrame ||
-          window.msRequestAnimationFrame ||
-          function(callback){
-              setTimeout(function(){
-                  callback(window.performance.now());
-              }, 1000/60);
-          };
-}());
+export let requestAnimationFrame = window.requestAnimationFrame ||
+                            window.webkitRequestAnimationFrame ||
+                            window.mozRequestAnimationFrame ||
+                            window.msRequestAnimationFrame ||
+                            function(callback) {
+                                setTimeout(function(){
+                                    callback(window.performance.now());
+                                }, 1000/60);
+                            };
 
-let cancelAnimationFrame = (function() {
-  return  window.cancelAnimationFrame ||
-          window.webkitCancelAnimationFrame ||
-          window.mozCancelAnimationFrame ||
-          window.msCancelAnimationFrame ||
-          window.clearTimeout(id);
-}());
+export let cancelAnimationFrame = window.cancelAnimationFrame ||
+                           window.webkitCancelAnimationFrame ||
+                           window.mozCancelAnimationFrame ||
+                           window.msCancelAnimationFrame ||
+                           window.clearTimeout;
 
 
-let performance = window.performance = {};
+export let performance = window.performance = {};
 performance.now = performance.now ||
                   performance.webkitNow ||
                   performance.mozNow ||
@@ -28,16 +24,15 @@ performance.now = performance.now ||
                   function() { return (new Date()).getTime(); };
 
 
-let AudioContext = window.AudioContext ||
+export let AudioContext = window.AudioContext ||
                    window.webkitAudioContext ||
-                   window.mozNow ||
-                   window.msNow ||
+                   window.mozAudioContext ||
                    undefined;
 
 
-module.exports = {
+/*module.exports = {
   requestAnimationFrame,
   cancelAnimationFrame,
   performance,
   AudioContext
-};
+};*/

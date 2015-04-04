@@ -46,6 +46,8 @@ export default class NetworkManager {
     socket.on('MINION.hit', this.onMinionHit.bind(this));
 
     socket.on('BASE.resources', this.onBaseResources.bind(thits));
+
+    socket.on('my player', this.onMyPlayer.bind(this));
   }
 
   send(msg, data) {
@@ -102,7 +104,9 @@ export default class NetworkManager {
   }
 
   onMyPlayer(data) {
-    
+    this.game.me = new Base(data.player.aspect_left, data.player.aspect_top, data.player.aspect_size, data.player.color);
+    this.game.me.player_id = data.player.player_id;
+    this.game.bases.push(this.game.me);
   }
 }
 
@@ -113,16 +117,6 @@ export default class NetworkManager {
 NET.init = function(){
 
 
-
-
-    //////////////
-    // GAME OLD //
-    //////////////
-    this.socket.on('my player', function(data){
-        GAME.me = new Base(data.player.aspect_left, data.player.aspect_top, data.player.aspect_size, data.player.color);
-        GAME.me.player_id = data.player.player_id;
-        GAME.bases.push(GAME.me);
-    });
 
     this.socket.on('g.players', function(data){
         var i, b, len;

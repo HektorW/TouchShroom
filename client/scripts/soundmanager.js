@@ -56,7 +56,7 @@ export default class SoundManager {
         this.sound_names.push(name);
         this.sounds[name] = buffer;
 
-        if(this.startup_event === null){
+        if('touchstart' in window && this.startup_event === null){
           this.startup_event = () => {
             this.playRandomSound();
             window.removeEventListener('touchstart', this.startup_event, false);
