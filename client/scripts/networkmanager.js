@@ -33,6 +33,7 @@ export default class NetworkManager extends EventEmitter {
   on(event, callback) {
     this.socket.on(event, callback);
   }
+
   send(event, data) {
     this.socket.emit(event, data);
   }

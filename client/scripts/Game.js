@@ -40,7 +40,7 @@ export default class Game {
   init() {
     this.inputManager = new InputManager(this).init();
 
-    this.canvas = document.querySelector('#canvas');
+    this.canvas = document.createElement('canvas');
     this.ctx = this.canvas.getContext('2d');
 
     this.bindFunctions();
@@ -52,12 +52,17 @@ export default class Game {
     return this;
   }
 
+  destroy() {
+
+  }
+
   bindFunctions() {
     this.loop = this.loop.bind(this);
+    this.resize = this.resize.bind(this);
   }
 
   initEvents() {
-    window.addEventListener('resize', this.resize.bind(this), false);
+    window.addEventListener('resize', this.resize, false);
   }
 
 
@@ -129,7 +134,7 @@ export default class Game {
       }
     }
 
-    this.send('PLAYER.ready');
+    this.networkManager.send('PLAYER.ready');
   }
 
 

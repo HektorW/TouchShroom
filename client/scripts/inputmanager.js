@@ -1,6 +1,8 @@
 
 import { EventEmitter } from 'events';
 
+// Should be made into singleton
+
 export default class InputManager extends EventEmitter {
 
   constructor(game) {
