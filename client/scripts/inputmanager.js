@@ -2,6 +2,8 @@
 import { EventEmitter } from 'events';
 
 // Should be made into singleton
+// Users will access with getState()
+// times will be calculated in getState()
 
 export default class InputManager extends EventEmitter {
 

@@ -14,6 +14,10 @@ export default class NetworkManager extends EventEmitter {
     this.connected = false;
   }
 
+  setGame(game) {
+    this.game = game;
+  }
+
 
   init() {
     this.connect();
@@ -98,7 +102,7 @@ export default class NetworkManager extends EventEmitter {
     timed('Players online: ' + data.num_players);
   }
   onServerInitgame() {
-    this.controller.startgame();
+    // this.controller.startgame();
   }
 
   onGameSetup(data) {

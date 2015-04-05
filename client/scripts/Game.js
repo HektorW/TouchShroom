@@ -1,6 +1,7 @@
 
 import { requestAnimationFrame, cancelAnimationFrame, performance } from './util/prefixer';
 import { drawLine, drawCircle } from './util/draw';
+import { pointInCircle } from './util/math';
 
 import InputManager from './inputmanager';
 
@@ -9,16 +10,21 @@ import Player from './objects/player';
 import Base from './objects/base';
 import Minion from './objects/minion';
 
+import BaseScreen from './screens/BaseScreen';
 
-export default class Game {
+
+export default class Game extends BaseScreen {
 
   constructor(networkManager, soundManager) {    
-    this.networkManager = networkManager;
-    this.soundManager = soundManager;
+    super(networkManager, soundManager);
+
+    // this.networkManager = networkManager;
+    // this.soundManager = soundManager;
+
+    this.inputManager = null;
 
     this.canvas = null;
     this.ctx = null;
-    this.soundManager = null;
 
     this.last_time = -1;
     this.now = -1;
@@ -34,6 +40,26 @@ export default class Game {
 
     this.me = null;
     this.animationFrame = null;
+
+    this.template = `
+      <h1 style="position:fixed; top:0; width:100%; left:0; text-align:center;">GAME</h1>
+      <div id="screen_game" class="screen">
+      </div>
+    `;
+
+    this.domEvents = {
+      'resize window': 'resize'
+    };
+
+    this.networkEvents = {
+
+    };
+  }
+
+  activate() {
+    super.activate();
+
+    this.init();
   }
 
 
@@ -44,7 +70,7 @@ export default class Game {
     this.ctx = this.canvas.getContext('2d');
 
     this.bindFunctions();
-    this.initEvents();
+    this.initDOMEvents();
     this.setupWierdArrayFunctions();
 
     this.resize();
@@ -52,17 +78,8 @@ export default class Game {
     return this;
   }
 
-  destroy() {
-
-  }
-
   bindFunctions() {
     this.loop = this.loop.bind(this);
-    this.resize = this.resize.bind(this);
-  }
-
-  initEvents() {
-    window.addEventListener('resize', this.resize, false);
   }
 
 
@@ -102,16 +119,16 @@ export default class Game {
 
 
   setup(data) {
-    let lvl_name = data.level_name;
-    let my_id = data.my_id;
-    let players = data.players;
+    const lvl_name = data.level_name;
+    const my_id = data.my_id;
+    const players = data.players;
 
     // timed('Level: ' + lvl_name);
 
     for(let i = 0, len = data.bases.length; i < len; i++){
-      let b = data.bases[i];
+      let base = data.bases[i];
       this.bases.push(
-        new Base(this, b.id, b.left, b.top, b.scale, b.resources, b.resources_max)
+        new Base(this, base.id, base.left, base.top, base.scale, base.resources, base.resources_max)
       );
     }
     for(let i = 0, len = players.length; i < len; i++){
@@ -182,6 +199,85 @@ export default class Game {
 
   update(time) {
     this.inputManager.update(time);
+
+    let pointerState = this.inputManager.getState();
+
+    var i, len, b, m, p;
+
+    // Reset hovered and targeted
+    this.hovered_base = null;
+    this.targeted_base = null;
+
+    for(i = 0, len = this.bases.length; i < len; i++){
+      b = this.bases[i];
+
+      // Update base
+      b.update(t);
+
+      // Reset base hovered & targeted state
+      b.hovered = false;
+      b.targeted = false;
+
+
+      /////////////////
+      // CHECK INPUT //
+      /////////////////
+      // Mouse is over base
+      if(pointInCircle(pointerState.x, pointerState.y, b.x, b.y, b.size)){
+        // See if there is any selected base and it isn't the one tested
+        if(this.selected_base && this.selected_base !== b){
+          // Set the base as targeted and try to send
+          GAME.trySendMinion(b);
+        }
+        else {
+          // Check if base belons to 'me'
+          if(this.me.bases_id.indexOf(b.id) !== -1){
+            // Set the base as hovered
+            b.hovered = true;
+          }
+        }
+      }
+
+      if(this.me.bases_id.indexOf(b.id) != -1){
+        if(!b.selected && pointInCircle(pointerState.x, pointerState.y, b.x, b.y, b.size)){
+          b.hovered = true;
+          this.hovered_base = b;
+        }
+      }
+    }
+
+
+
+    // Update minions
+    for(i = 0, len = this.minions.length; i < len; i++){
+      m = this.minions[i];
+      if(m.active){
+        m.update(t);
+
+        if(!m.active){
+          SOUND.playRandomSound();
+
+          this.particles.push(
+            new Particle(m.target_base.left, m.target_base.top, m.target_base.scale, m.source_base.color)
+            );
+        }
+      }
+      if(m.dead_by_server && !m.active){
+        this.minions.splice(i--, 1);
+        --len;
+      }
+    }
+
+    // Update paticles
+    for(i = 0, len = this.particles.length; i < len; i++){
+      p = this.particles[i];
+      p.update(t);
+
+      if(!p.active){
+        this.particles.splice(i--, 1);
+        --len;
+      }
+    }
   }
 
 
@@ -389,97 +485,6 @@ function heheScopeAwaySillyImplementation() {
       var player = this.players.byID(new_player_id);
       target.setPlayer(player);
     }
-  };
-
-  /**
-   * { UPDATE }
-   * @param  {Number} t   Elapsed time since last update (seconds)
-   */
-  GAME.update = function(t){
-    var i, len, b, m, p;
-
-
-    // Reset hovered and targeted
-    this.hovered_base = null;
-    this.targeted_base = null;
-
-
-
-    for(i = 0, len = this.bases.length; i < len; i++){
-      b = this.bases[i];
-
-      // Update base
-      b.update(t);
-
-      // Reset base hovered & targeted state
-      b.hovered = false;
-      b.targeted = false;
-
-
-      /////////////////
-      // CHECK INPUT //
-      /////////////////
-      // Mouse is over base
-      if(pointInCircle(TOUCH.x, TOUCH.y, b.x, b.y, b.size)){
-        // See if there is any selected base and it isn't the one tested
-        if(this.selected_base && this.selected_base !== b){
-          // Set the base as targeted and try to send
-          GAME.trySendMinion(b);
-        }
-        else {
-          // Check if base belons to 'me'
-          if(this.me.bases_id.indexOf(b.id) !== -1){
-            // Set the base as hovered
-            b.hovered = true;
-          }
-        }
-      }
-
-      if(this.me.bases_id.indexOf(b.id) != -1){
-        if(!b.selected && pointInCircle(TOUCH.x, TOUCH.y, b.x, b.y, b.size)){
-          b.hovered = true;
-          this.hovered_base = b;
-        }
-      }
-    }
-
-
-
-    // Update minions
-    for(i = 0, len = this.minions.length; i < len; i++){
-      m = this.minions[i];
-      if(m.active){
-        m.update(t);
-
-        if(!m.active){
-          SOUND.playRandomSound();
-
-          this.particles.push(
-            new Particle(m.target_base.left, m.target_base.top, m.target_base.scale, m.source_base.color)
-            );
-        }
-      }
-      if(m.dead_by_server && !m.active){
-        this.minions.splice(i--, 1);
-        --len;
-      }
-    }
-
-    // Update paticles
-    for(i = 0, len = this.particles.length; i < len; i++){
-      p = this.particles[i];
-      p.update(t);
-
-      if(!p.active){
-        this.particles.splice(i--, 1);
-        --len;
-      }
-    }
-  };
-
-
-  GAME.send = function(msg, data){
-    NET.send(msg, data);
   };
   
 

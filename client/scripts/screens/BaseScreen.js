@@ -27,11 +27,8 @@ export default class BaseScreen extends EventEmitter {
       this.unrenderDOM();
     }
 
-    if (template) {
-      this.$el = $(template);
-    } else {
-      this.$el = $('<div>');
-    }
+    template = template || this.template || '<div>';
+    this.$el = $(template);
 
     $parent.html(this.$el);
     this.bindDOMEvents();
@@ -39,6 +36,7 @@ export default class BaseScreen extends EventEmitter {
   unrenderDOM() {
     if (!this.$el) {
       console.warn('Unrender screen which has no $el');
+      return;
     }
 
     this.unbindDOMEvents();
@@ -52,9 +50,17 @@ export default class BaseScreen extends EventEmitter {
       let split = definition.split(' ');
       let event = split[0];
       let selector = split.slice(1).join(' ');
+
+      let $el;
+      if (selector === 'window') {
+        $el = $(window);
+      } else {
+        $el = this.$el.find(selector);
+      }
+
       let callback = this[this.domEvents[definition]];
 
-      this.$el.find(selector).on(event, callback.bind(this));
+      $el.on(event, callback.bind(this));
     }
   }
   unbindDOMEvents() {
@@ -75,7 +81,10 @@ export default class BaseScreen extends EventEmitter {
       this.networkManager.on(event, handler);
     }
   }
+
   unbindNetworkEvents() {
+    if (!this._networkEventHandlers) return;
+
     this._networkEventHandlers.forEach((networkEvent) => {
       this.networkManager.off(networkEvent.event, networkEvent.handler);
     });

@@ -34,14 +34,21 @@ export default class ScreenManager {
 
     this.screens.loading = new LoadingScreen(this.networkManager, this.soundManager);
     this.screens.start = new StartScreen(this.networkManager, this.soundManager);
+    this.screens.lobby = new LobbyScreen(this.networkManager, this.soundManager);
     this.screens.game = new GameScreen(this.networkManager, this.soundManager);
     this.screens.noConnection = new NoConnectionScreen(this.networkManager, this.soundManager);
-    this.screens.lobby = new LobbyScreen(this.networkManager, this.soundManager);
 
     for (let screenName in this.screens) {
       let screen = this.screens[screenName];
       screen.on('requestScreen', (data) => {
-        this.setScreen(data.screen);
+        let screen = this.screens[data.screen];
+
+        if (!screen) {
+          console.warn(`Invalid screen requested: ${data.screen}`);
+          return;
+        }
+
+        this.setScreen(screen);
       });
     }
   }

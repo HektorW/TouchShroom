@@ -6,13 +6,11 @@ import Game from '../Game';
 export default class GameScreen extends BaseScreen {
 
   constructor(...args) {
-    super.apply(this, args)
+    super(...args)
 
     this.game = new Game(this.networkManager, this.soundManager);
 
-    this.networkEvents = {
-      
-    };
+    this.networkEvents = {};
   }
 
   activate() {

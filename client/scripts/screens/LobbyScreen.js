@@ -4,11 +4,17 @@ import BaseScreen from './BaseScreen';
 export default class LobbyScreen extends BaseScreen {
 
   constructor(...args) {
-    super.apply(this, args);
+    super(...args);
 
     this.networkEvents = {
-      'SERVER.initgame': onGameInit
+      'SERVER.initgame': 'onGameInit'
     };
+  }
+
+  activate() {
+    super.activate();
+
+    this.networkManager.send('CLIENT.play');
   }
 
   renderDOM($parent) {
