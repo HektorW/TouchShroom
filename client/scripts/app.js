@@ -1,7 +1,7 @@
 
-import SoundManager from './soundmanager';
-import NetworkManager from './networkmanager';
-import ScreenManager from './screenmanager';
+import SoundManager from './SoundManager';
+import NetworkManager from './NetworkManager';
+import ScreenManager from './ScreenManager';
 
 export default class App {
 

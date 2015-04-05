@@ -12,7 +12,7 @@ export default class Player {
   }
 
   addBase(base) {
-    if(!this.bases_id.contains(base.id))
+    if(this.bases_id.indexOf(base.id) === -1)
       this.bases_id.push(base.id);
   }
 

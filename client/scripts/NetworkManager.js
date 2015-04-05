@@ -53,9 +53,9 @@ export default class NetworkManager extends EventEmitter {
     socket.on('SERVER.num_players', this.onServerNumPlayers.bind(this));
     socket.on('SERVER.initgame', this.onServerInitgame.bind(this));
 
-    socket.on('GAME.setup', this.onGameSetup.bind(this));
-    socket.on('GAME.start', this.onGameStart.bind(this));
-    socket.on('GAME.end', this.onGameEnd.bind(this));
+    // socket.on('GAME.setup', this.onGameSetup.bind(this));
+    // socket.on('GAME.start', this.onGameStart.bind(this));
+    // socket.on('GAME.end', this.onGameEnd.bind(this));
     socket.on('GAME.disconnection', this.onGameDisconnection.bind(this));
     socket.on('GAME.minion', this.onGameMinion.bind(this));
 

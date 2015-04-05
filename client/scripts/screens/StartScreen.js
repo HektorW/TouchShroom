@@ -6,19 +6,15 @@ export default class StartScreen extends BaseScreen {
   constructor(networkManager, soundManager) {
     super(networkManager, soundManager);
 
-    this.domEvents = {
-      'click #btn_play': 'onPlayClick'
-    };
-  }
-
-  renderDOM($parent) {
-    let template = `
+    this.template = `
       <div id="screen_start" class="screen">
         <button id="btn_play">Play</button>
       </div>
     `;
 
-    super.renderDOM($parent, template);
+    this.domEvents = {
+      'click #btn_play': 'onPlayClick'
+    };
   }
 
 

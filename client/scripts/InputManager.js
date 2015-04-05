@@ -1,11 +1,9 @@
 
-import { EventEmitter } from 'events';
-
 // Should be made into singleton
 // Users will access with getState()
 // times will be calculated in getState()
 
-export default class InputManager extends EventEmitter {
+export default class InputManager {
 
   constructor(game) {
     this.game = game;
@@ -57,6 +55,8 @@ export default class InputManager extends EventEmitter {
   translateEventCoordinates(event) {
     if (event.changedTouches) {
       return [ event.changedTouches[0].pageX, event.changedTouches[0].pageY ];
+    } else {
+      return [ event.pageX, event.pageY ];
     }
   }
 
@@ -64,7 +64,8 @@ export default class InputManager extends EventEmitter {
     event.preventDefault();
 
     let [ pageX, pageY ] = this.translateEventCoordinates(event);
-    [ this.pointer.x, this.pointer.y ] = [ pageX, pageY ];
+    this.pointer.x = pageX;
+    this.pointer.y = pageY;
   }
 
   onPointerDown(event) {
@@ -75,7 +76,6 @@ export default class InputManager extends EventEmitter {
   onPointerUp(event) {
     this.updatePosition(event);
     this.pointer.down = false;
-    this.trigger('pointer.up');
   }
 
 }
