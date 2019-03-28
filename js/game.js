@@ -86,13 +86,14 @@ SOUND.playSound = function(note){
     s.connect(gain);
     gain.connect(SOUND.ctx.destination);
 
-    s.noteOn(0);
+    // s.noteOn(0);
+    s.start()
 };
 SOUND.playRandomSound = function(){
     SOUND.playSound(SOUND.sound_names[randomRangeInt(0, SOUND.sound_names.length)]);
 };
 SOUND.gainNode = function(start, end, time){
-    var g = SOUND.ctx.createGainNode();
+    var g = SOUND.ctx.createGain();
     var n = SOUND.ctx.currentTime;
     g.gain.linearRampToValueAtTime(start, n);
     g.gain.linearRampToValueAtTime(end, n + time);
@@ -124,7 +125,8 @@ var GAME = {
  * General initialization not bound to a game instance
  */
 GAME.init = function(){
-    SOUND.init();
+    window.addEventListener('click', () => SOUND.init());
+    // SOUND.init();
 
     GAME.canvas = document.querySelector('#canvas');
     GAME.ctx = GAME.canvas.getContext('2d');
